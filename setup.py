@@ -1,11 +1,11 @@
 from setuptools import setup
 
 setup(
-   name='seq2seq',
+   name='cddd',
    version='0.1',
-   description='A useful module',
+   description='continous and data-driven molecular descriptors (CDDD)',
    author='Robin Winter',
    author_email='robin.winter@bayer.com',
-   packages=['seq2seq'],  #same as name
+   packages=['cddd'],  #same as name
    #install_requires=['tensorflow'], #external packages as dependencies
 )

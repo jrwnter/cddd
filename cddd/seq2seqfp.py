@@ -6,7 +6,6 @@ from sklearn.preprocessing import scale
 from seq2seq.inference import simple_inference, simple_inference_decode
 from seq2seq.smilesseq2seq import add_arguments, create_hparams
 from seq2seq.model_helper import build_models, create_infer_model
-from seq2seq.models import OptModel
 
 def seq2seq_descriptor_gpu(sml_list, model_path, batch_size=256):
     parser = argparse.ArgumentParser()
