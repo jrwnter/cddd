@@ -106,7 +106,7 @@ def eval_reconstruct(model, step, hparams):
     header = ["step"] + list(model.model.measures_to_log.keys())
     fields = [step]
     if step == 0:
-        with open(os.path.join(hparams.save_dir, model.model.mode + ".csv"), 'w') as f:
+        with open(os.path.join(hparams.save_dir, "eval_reconstruct.csv"), 'w') as f:
             writer = csv.writer(f)
             writer.writerow(header)
             

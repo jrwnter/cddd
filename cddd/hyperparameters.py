@@ -14,7 +14,6 @@ def add_arguments(parser):
     parser.add_argument('-l','--learning_rate', default=0.0005, type=int)
     parser.add_argument('-s','--save_dir', help='path to save and log files', default=".", type=str)
     parser.add_argument('-d','--device', help="number of cuda visible devise", default="-1", type=str)
-    parser.add_argument('-r', '--restore', help="restore oldd model?", default=False, type=bool)
     parser.add_argument('-gmf', '--gpu_mem_frac', default=1.0, type=float)
     parser.add_argument('-n','--num_steps', help="number of train steps", default=250000, type=int)
     parser.add_argument('--summary_freq', default=1000, type=int)
@@ -37,7 +36,7 @@ def add_arguments(parser):
     parser.add_argument('--buffer_size', default=10000, type=int)
     parser.add_argument('--lr_decay', default=True, type=bool)
     parser.add_argument('--lr_decay_frequency', default=50000, type=int)
-    parser.add_argument('--lr_decay_factor', default=0.9, type=int)
+    parser.add_argument('--lr_decay_factor', default=0.9, type=float)
     parser.add_argument('--num_buckets', default=8., type=float)
     parser.add_argument('--min_bucket_length', default=20.0, type=float)
     parser.add_argument('--max_bucket_length', default=60.0, type=float)
@@ -46,7 +45,6 @@ def add_arguments(parser):
     parser.add_argument('--save_hparams', default=True, type=bool)
     parser.add_argument('--hparams_from_file', default=False, type=bool)
     parser.add_argument('--hparams_file_name', default=None, type=str)
-    parser.add_argument('--output_file_name', default=None, type=str)
     parser.add_argument('--rand_input_swap', default=False, type=bool)
     parser.add_argument('--infer_input', default="random", type=str)
     
@@ -63,7 +61,6 @@ def create_hparams(flags):
         emb_size = flags.emb_size,
         save_dir = flags.save_dir,
         device = flags.device,
-        restore = flags.restore,
         lr = flags.learning_rate,
         gpu_mem_frac = flags.gpu_mem_frac,
         num_steps = flags.num_steps,
@@ -92,7 +89,6 @@ def create_hparams(flags):
         min_bucket_length = flags.min_bucket_length,
         max_bucket_length = flags.max_bucket_length,
         num_features = flags.num_features,
-        output_file_name = flags.output_file_name,
         rand_input_swap = flags.rand_input_swap,
         infer_input = flags.infer_input,
     )
