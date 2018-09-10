@@ -17,6 +17,7 @@ class BaseModel(ABC):
             self.encode_voc_size = len(self.encode_vocabulary)
         if mode in ["TRAIN", "EVAL","DECODE"]:
             self.decode_vocabulary = {v: k for k, v in np.load(hparams.decode_vocabulary_file).item().items()}
+            self.decode_vocabulary_reverse = {v: k for k, v in self.decode_vocabulary.items()}
             self.decode_voc_size = len(self.decode_vocabulary)
         self.char_embedding_size = hparams.char_embedding_size
         self.global_step = tf.get_variable('global_step', [], initializer=tf.constant_initializer(0), trainable=False)
@@ -52,7 +53,7 @@ class BaseModel(ABC):
                 encoded_seq = self._encoder(encoder_emb_inp)
                 
             with tf.variable_scope("Decoder"):
-                logits = self._decoder(decoder_emb_inp, encoded_seq)
+                logits = self._decoder(encoded_seq, decoder_emb_inp)
                 self.prediction = tf.argmax(logits, axis=2, output_type=tf.int32)
                 
             with tf.name_scope("Measures"):
@@ -76,7 +77,7 @@ class BaseModel(ABC):
                 
         if self.mode == "DECODE":
             # TODO: This will fail when decoder_embedding != encoder_embedding of trained modell
-            self.decoder_embedding = tf.get_variable("char_embedding", [self.encode_voc_size, self.char_embedding_size])
+            self.decoder_embedding = tf.get_variable("char_embedding", [self.decode_voc_size, self.char_embedding_size])
             with tf.name_scope("Input"):
                 self.encoded_seq = tf.placeholder(tf.float32, [None, self.embedding_size])
 
@@ -145,7 +146,7 @@ class BaseModel(ABC):
         raise NotImplementedError("Must override _encoder in child class")
     
     @abstractmethod
-    def _decoder(self, decoder_emb_inp, encoded_seq):
+    def _decoder(self, encoded_seq, decoder_emb_inp=None):
         raise NotImplementedError("Must override _decoder in child class")
 
     def _compute_loss(self, logits):
@@ -223,7 +224,7 @@ class GRUSeq2Seq(BaseModel):
                              )
         return embgit 
 
-    def _decoder(self, decoder_emb_inp, encoded_seq):
+    def _decoder(self, encoded_seq, decoder_emb_inp=None):
         if self.reverse_decoding:
             self.cell_size = self.cell_size[::-1]
         decoder_cell = [tf.nn.rnn_cell.GRUCell(size) for size in self.cell_size]
@@ -312,7 +313,7 @@ class LSTMSeq2Seq(BaseModel):
                              )
         return emb
 
-    def _decoder(self, decoder_emb_inp, encoded_seq):
+    def _decoder(self, encoded_seq, decoder_emb_inp=None):
         decoder_cell = [tf.nn.rnn_cell.LSTMCell(size) for size in self.cell_size]
         decoder_cell = tf.contrib.rnn.MultiRNNCell(decoder_cell)
         initial_state_c_full = tf.layers.dense(encoded_seq, sum(self.cell_size))
@@ -374,7 +375,7 @@ class GRUSeq2SeqWithFeatures(GRUSeq2Seq):
             with tf.variable_scope("Encoder"):
                 encoded_seq = self._encoder(encoder_emb_inp)
             with tf.variable_scope("Decoder"):
-                sequence_logits = self._decoder(decoder_emb_inp, encoded_seq)
+                sequence_logits = self._decoder(encoded_seq, decoder_emb_inp)
                 self.sequence_prediction = tf.argmax(sequence_logits, axis=2, output_type=tf.int32)
             with tf.variable_scope("Feature_Regression"):
                 feature_predictions = self._feature_regression(encoded_seq)
@@ -400,7 +401,7 @@ class GRUSeq2SeqWithFeatures(GRUSeq2Seq):
                 
         if self.mode == "DECODE":
             # TODO: This will fail when decoder_embedding != encoder_embedding of trained modell
-            self.decoder_embedding = tf.get_variable("char_embedding", [self.encode_voc_size, self.char_embedding_size])
+            self.decoder_embedding = tf.get_variable("char_embedding", [self.decode_voc_size, self.char_embedding_size])
             with tf.name_scope("Input"):
                 self.encoded_seq = tf.placeholder(tf.float32, [None, self.embedding_size])
 
