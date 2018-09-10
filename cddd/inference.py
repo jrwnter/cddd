@@ -1,7 +1,8 @@
 import argparse
 import numpy as np
 from cddd.input_pipeline import InputPipelineInferEncode, InputPipelineInferDecode
-
+from cddd.hyperparameters import add_arguments, create_hparams
+from cddd.model_helper import build_models
 def sequence2embedding(model, hparams, seq_list):
     emb_list = []
     with model.graph.as_default():
@@ -36,3 +37,47 @@ def embedding2sequence(model, hparams, embedding, num_top=1):
         if (len(seq_list) == 1 ) & isinstance(seq_list, str):
             return seq_list[0]
     return seq_list
+
+def calculate_descriptor(sml_list, model_path, batch_size=256, gpu_mem_frac=0.1):
+    parser = argparse.ArgumentParser()
+    add_arguments(parser)
+    flags, unparsed = parser.parse_known_args()
+    flags.hparams_from_file = True
+    flags.save_dir = model_path
+    hparams = create_hparams(flags)
+    hparams.set_hparam("save_dir", model_path)
+    hparams.set_hparam("batch_size", batch_size)
+    hparams.set_hparam("gpu_mem_frac", gpu_mem_frac)
+    encode_model = build_models(hparams, modes="ENCODE")
+    embedding = sequence2embedding(encode_model, hparams, sml_list)
+    return embedding
+
+class InferenceModel():
+    def __init__(self, model_path, batch_size=256, gpu_mem_frac=0.1, beam_width=10, num_top=1):
+        self.num_top = num_top
+        parser = argparse.ArgumentParser()
+        add_arguments(parser)
+        flags, unparsed = parser.parse_known_args()
+        flags.hparams_from_file = True
+        flags.save_dir = model_path
+        self.hparams = create_hparams(flags)
+        self.hparams.set_hparam("save_dir", model_path)
+        self.hparams.set_hparam("batch_size", batch_size)
+        self.hparams.set_hparam("gpu_mem_frac", gpu_mem_frac)
+        self.hparams.add_hparam("beam_width", beam_width)
+        self.encode_model, self.decode_model = build_models(self.hparams, modes=["ENCODE", "DECODE"])
+        
+    def sml_to_emb(self, smls):
+        if isinstance(smls, str):
+            smls = [smls]
+        return sequence2embedding(self.encode_model, self.hparams, smls)
+    
+    def emb_to_sml(self, embedding):
+        if embedding.ndim == 1:
+            embedding = np.expand_dims(embedding, 0)
+        smls = embedding2sequence(self.decode_model, self.hparams, embedding, self.num_top)
+        if len(smls) == 1:
+            smls = smls[0]
+        if len(smls) == 1:
+            smls = smls[0]
+        return smls 

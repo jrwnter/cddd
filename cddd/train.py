@@ -9,18 +9,15 @@ import argparse
 import json
 from cddd.model_helper import build_models
 from cddd.evaluation import eval_reconstruct, parallel_eval_qsar
-from cdd.hyperparameters import add_arguments, create_hparams
+from cddd.hyperparameters import add_arguments, create_hparams
 tf.logging.set_verbosity(tf.logging.ERROR)
 FLAGS = None
 
 def train_loop(train_model, eval_model, encoder_model, hparams):
     infer_process = []
     with train_model.graph.as_default():
-        if hparams.restore:
-            step = train_model.model.restore(train_model.sess)
-        else:
-            train_model.sess.run(train_model.model.iterator.initializer)
-            step = train_model.model.initilize(train_model.sess, overwrite_saves=hparams.overwrite_saves)
+        train_model.sess.run(train_model.model.iterator.initializer)
+        step = train_model.model.initilize(train_model.sess, overwrite_saves=hparams.overwrite_saves)
     hparams_file_name = FLAGS.hparams_file_name
     if hparams_file_name is None:
         hparams_file_name = os.path.join(hparams.save_dir, 'hparams.json')
@@ -43,6 +40,7 @@ def train_loop(train_model, eval_model, encoder_model, hparams):
         p.join()
     
 def main(unused_argv):
+    hparams = create_hparams(FLAGS)
     os.environ['CUDA_VISIBLE_DEVICES'] = str(hparams.device)
     train_model, eval_model, encode_model = build_models(hparams)
     train_loop(train_model, eval_model, encode_model, hparams)
