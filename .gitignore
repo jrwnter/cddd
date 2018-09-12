@@ -107,6 +107,7 @@ venv.bak/
 saves/
 saves2/
 vs_benchmark/
+TODO.txt
 run.sh
 run2.sh
 *.ipynb

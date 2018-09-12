@@ -6,7 +6,8 @@ from rdkit import Chem
 remover = SaltRemover()
 ORGANIC_ATOM_SET = set([5, 6, 7, 8, 9, 15, 16, 17, 35, 53])
 
-def dataframe_to_tfrecord(df, tfrecord_file_name, random_smiles_key=None, canonical_smiles_key=None, inchi_key=None, mol_feature_keys=None, shuffle_first=False)
+
+def dataframe_to_tfrecord(df, tfrecord_file_name, random_smiles_key=None, canonical_smiles_key=None, inchi_key=None, mol_feature_keys=None, shuffle_first=False):
     writer = tf.python_io.TFRecordWriter(tfrecord_file_name)
     if shuffle_first:
         df = df.sample(frac=1).reset_index(drop=True)
@@ -28,12 +29,40 @@ def dataframe_to_tfrecord(df, tfrecord_file_name, random_smiles_key=None, canoni
         serialized = example.SerializeToString()
         writer.write(serialized)
     writer.close()
+    
+def randomize_smile(sml):
+    """randomize a SMILES
+       This was adapted from the implemetation of E. Bjerrum 2017, 
+       SMILES Enumeration as Data Augmentation for Neural Network Modeling
+       of Molecules"""
+    try:
+        m = Chem.MolFromSmiles(sml)
+        ans = list(range(m.GetNumAtoms()))
+        np.random.shuffle(ans)
+        nm = Chem.RenumberAtoms(m, ans)
+        return Chem.MolToSmiles(nm, canonical=False)
+    except:
+        return float('nan')
+    
+def canonical_smile(sml):
+    return Chem.MolToSmiles(sml, canonical=True)
+
+def keep_largest_fragment(sml):
+    mol_frags = Chem.GetMolFrags(Chem.MolFromSmiles(sml), asMols=True)
+    largest_mol = None
+    largest_mol_size = 0
+    for mol in mol_frags:
+        size = mol.GetNumAtoms()
+        if size > largest_mol_size:
+            largest_mol = mol
+            largest_mol_size = size
+    return Chem.MolToSmiles(largest_mol)
      
 def remove_salt(sml, remover):
     try:
         sml = Chem.MolToSmiles(remover.StripMol(Chem.MolFromSmiles(sml), dontRemoveEverything=True))
         if "." in sml:
-            sml = np.float("nan")
+            sml = keep_largest_fragment(sml)
     except:
         sml = np.float("nan")
     return(sml)
