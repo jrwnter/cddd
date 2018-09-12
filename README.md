@@ -7,4 +7,8 @@ Descriptors by Translating Equivalent Chemical Representations" by Robin Winter,
 ## Getting Started
 
 ## Prerequisites
-
+```
+tensorflow 1.10
+numpy
+rdkit
+```
