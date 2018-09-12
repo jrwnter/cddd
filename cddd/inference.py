@@ -53,8 +53,9 @@ def calculate_descriptor(sml_list, model_path, batch_size=256, gpu_mem_frac=0.1)
     return embedding
 
 class InferenceModel():
-    def __init__(self, model_path, batch_size=256, gpu_mem_frac=0.1, beam_width=10, num_top=1):
+    def __init__(self, model_path, use_gpu=True, batch_size=256, gpu_mem_frac=0.1, beam_width=10, num_top=1):
         self.num_top = num_top
+        self.use_gpu = use_gpu
         parser = argparse.ArgumentParser()
         add_arguments(parser)
         flags, unparsed = parser.parse_known_args()
@@ -70,12 +71,21 @@ class InferenceModel():
     def sml_to_emb(self, smls):
         if isinstance(smls, str):
             smls = [smls]
-        return sequence2embedding(self.encode_model, self.hparams, smls)
+        if self.use_gpu:
+            emb = sequence2embedding(self.encode_model, self.hparams, smls)
+        else:
+            with tf.device("/cpu:0"):
+                emb = sequence2embedding(self.encode_model, self.hparams, smls)
+        return emb
     
     def emb_to_sml(self, embedding):
         if embedding.ndim == 1:
-            embedding = np.expand_dims(embedding, 0)
-        smls = embedding2sequence(self.decode_model, self.hparams, embedding, self.num_top)
+            embedding = np.expand_dims(embedding, 0) 
+        if self.use_gpu:
+            smls = embedding2sequence(self.decode_model, self.hparams, embedding, self.num_top)
+        else:
+            with tf.device("/cpu:0"):
+                smls = embedding2sequence(self.decode_model, self.hparams, embedding, self.num_top)
         if len(smls) == 1:
             smls = smls[0]
         if len(smls) == 1:
