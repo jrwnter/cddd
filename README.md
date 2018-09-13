@@ -16,3 +16,12 @@ rdkit
 
 ## Getting Started
 
+Run the script run_cddd.py to extract molecular descripotrs of your provided SMILES.
+
+### Input
+
+Supported input: 
+```
+.txt-file with one SMILES per row
+```
+
