@@ -111,7 +111,6 @@ TODO.txt
 run.sh
 run2.sh
 *.ipynb
-*.npy
 *.pkl
 *.png
 *.csv
