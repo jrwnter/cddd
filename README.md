@@ -22,7 +22,7 @@ run_cddd.py --input smiles.txt --output descriptors.txt
 ```
 ### Input
 Supported input: 
-..* .txt-file with one SMILES per row
+  * .txt-file with one SMILES per row
 
 
 
