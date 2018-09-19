@@ -58,7 +58,7 @@ class InferenceModel():
         self.use_gpu = use_gpu
         parser = argparse.ArgumentParser()
         add_arguments(parser)
-        flags, unparsed = parser.parse_known_args()
+        flags = parser.parse_args([])
         flags.hparams_from_file = True
         flags.save_dir = model_path
         self.hparams = create_hparams(flags)
