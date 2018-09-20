@@ -58,9 +58,9 @@ def keep_largest_fragment(sml):
             largest_mol_size = size
     return Chem.MolToSmiles(largest_mol)
      
-def remove_salt(sml, remover):
+def remove_salt_stereo(sml, remover):
     try:
-        sml = Chem.MolToSmiles(remover.StripMol(Chem.MolFromSmiles(sml), dontRemoveEverything=True))
+        sml = Chem.MolToSmiles(remover.StripMol(Chem.MolFromSmiles(sml), dontRemoveEverything=True), isomericSmiles=False)
         if "." in sml:
             sml = keep_largest_fragment(sml)
     except:
@@ -79,7 +79,7 @@ def organic_filter(sml):
         return False
 
 def preprocess_smiles(sml):
-    new_sml = remove_salt(sml, remover)
+    new_sml = remove_salt_stereo(sml, remover)
     if new_sml != np.float("nan"):
         if not organic_filter(new_sml):
             new_sml = np.float("nan")

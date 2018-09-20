@@ -3,6 +3,7 @@ import sys
 import argparse
 import warnings
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 from cddd.inference import InferenceModel
 from cddd.preprocessing import preprocess_smiles
@@ -12,49 +13,52 @@ FLAGS=None
 def add_arguments(parser):
     parser.add_argument('-i', '--input', help='input .txt file with one SMILES per row.', type=str)
     parser.add_argument('-o', '--output', help='output .txt file with a descriptor for each SMILES per row, delimeted by tab.', type=str)
-    parser.add_argument('--preprocess', default=True, type=bool)
+    parser.add_argument('--smiles_header', help='specify the name of the SMILES column header here', default="smiles", type=str)
+    parser.add_argument('--id_header', help='If the input file got a ID column, specify the name of the ID column header here', default="", type=str)
+    parser.add_argument('--preprocess', dest='preprocess', action='store_true')
+    parser.add_argument('--no-preprocess', dest='preprocess', action='store_false')
+    parser.set_defaults(preprocess=True)
     parser.add_argument('--model_path', default="default", type=str)
     parser.add_argument('--gpu', default=True, type=bool)
     parser.add_argument('--device', default="0", type=str)
     parser.add_argument('--batch_size', default=512, type=int)
     
-def preprocess(sml_list):
-    sml_list2 = []
-    fail_ids = []
-    for i, sml in enumerate(sml_list):
-        new_sml = preprocess_smiles(sml)
-        if isinstance(new_sml, str):
-            sml_list2.append(new_sml)
-        else:
-            fail_ids.append(i)
-    num_fails = len(fail_ids)
-    if  num_fails > 0:
-        warnings.warn("Warning: The input file contains {} SMILES that could not be interpreted. Outputting nan....".format(num_fails))
-    return sml_list2, fail_ids
+def read_input():
+    file = FLAGS.input
+    if file.endswith('.csv'):
+        df = pd.read_csv(file)
+    if file.endswith('.smi'):
+        df = pd.read_table(file)
+    return df
+    
     
 def main(unused_argv):
     if FLAGS.gpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = str(FLAGS.device)
-    print("reading in SMILES...")
-    with open(FLAGS.input) as f:
-        sml_list = f.read().splitlines()
-    if FLAGS.preprocess:
-        print("start preprocessing SMILES...")
-        sml_list, fail_ids = preprocess(sml_list)
-    print("finished preprocessing SMILES!")
     if FLAGS.model_path == "default":
-        model_path = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'data', 'default_model'))
+        model_path = None
     else:
         model_path = FLAGS.model_path
+        
+    df = read_input()
+    if FLAGS.preprocess:
+        print("start preprocessing SMILES...")
+        df["new_smiles"] = df[FLAGS.smiles_header].map(preprocess_smiles)
+        sml_list = df[~df.new_smiles.isna()].new_smiles.tolist()
+        print("finished preprocessing SMILES!")
+    else:
+        sml_list = df[FLAGS.smiles_header].tolist()
     print("start calculating descriptors...")
     infer_model = InferenceModel(model_path=model_path, use_gpu=FLAGS.gpu, batch_size=FLAGS.batch_size)
     descriptors = infer_model.sml_to_emb(sml_list)
-    print("finished calculating descriptors!")
-    nan_arr = np.ones(descriptors.shape[1]) * np.float("nan")
-    for i in fail_ids:
-        descriptors = np.insert(descriptors, i, nan_arr, 0)
+    print("finished calculating descriptors! %d out of %d input SMILES could be interpreted" %(len(sml_list), len(df)))
+    
+    if FLAGS.preprocess:
+        df = df.join(pd.DataFrame(descriptors, index=df[~df.new_smiles.isna()].index, columns=["cddd_" + str(i+1) for i in range(512)]))
+    else:
+        df = df.join(pd.DataFrame(descriptors, index=df.index, columns=["cddd_" + str(i+1) for i in range(512)]))
     print("writing descriptors to file...")
-    np.savetxt(FLAGS.output, descriptors, delimiter="\t")
+    df.to_csv(FLAGS.output)
     
 
 if __name__ == "__main__":
