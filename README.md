@@ -12,6 +12,7 @@ python 3
 tensorflow 1.10
 numpy
 rdkit
+scikit-learn
 ```
 
 ## Getting Started
