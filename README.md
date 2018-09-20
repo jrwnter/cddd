@@ -12,17 +12,20 @@ python 3
 tensorflow 1.10
 numpy
 rdkit
+scikit-learn
 ```
 
 ## Getting Started
 
 Run the script run_cddd.py to extract molecular descripotrs of your provided SMILES:
 ```
-run_cddd.py --input smiles.txt --output descriptors.txt
+run_cddd.py --input smiles.smi --output descriptors.csv  --smiles_header smiles
 ```
 ### Input
 Supported input: 
-  * .txt-file with one SMILES per row
+  * .csv-file with one SMILES per row
+  * .smi-file with one SMILES per row
 
+Specify the header of the SMILES column with the flag --smiles_header (default: smiles)
 
 
