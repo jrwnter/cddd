@@ -14,7 +14,6 @@ def add_arguments(parser):
     parser.add_argument('-i', '--input', help='input .txt file with one SMILES per row.', type=str)
     parser.add_argument('-o', '--output', help='output .txt file with a descriptor for each SMILES per row, delimeted by tab.', type=str)
     parser.add_argument('--smiles_header', help='specify the name of the SMILES column header here', default="smiles", type=str)
-    parser.add_argument('--id_header', help='If the input file got a ID column, specify the name of the ID column header here', default="", type=str)
     parser.add_argument('--preprocess', dest='preprocess', action='store_true')
     parser.add_argument('--no-preprocess', dest='preprocess', action='store_false')
     parser.set_defaults(preprocess=True)
