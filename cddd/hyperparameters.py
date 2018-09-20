@@ -1,7 +1,7 @@
 import tensorflow as tf
 import os
 import json
-defaul_data_dir = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'data'))
+defaul_data_dir = os.path.abspath(os.path.join(os.path.dirname( __file__ ), 'data'))
 def add_arguments(parser):
     parser.add_argument('-m', '--model', help='which model?', default="NoisyGRUSeq2SeqWithFeatures", type=str)
     parser.add_argument('-i', '--input_pipeline', default="InputPipelineWithFeatures", type=str)

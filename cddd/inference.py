@@ -1,8 +1,10 @@
 import argparse
 import numpy as np
+import os
 from cddd.input_pipeline import InputPipelineInferEncode, InputPipelineInferDecode
 from cddd.hyperparameters import add_arguments, create_hparams
 from cddd.model_helper import build_models
+
 def sequence2embedding(model, hparams, seq_list):
     emb_list = []
     with model.graph.as_default():
@@ -53,7 +55,9 @@ def calculate_descriptor(sml_list, model_path, batch_size=256, gpu_mem_frac=0.1)
     return embedding
 
 class InferenceModel():
-    def __init__(self, model_path, use_gpu=True, batch_size=256, gpu_mem_frac=0.1, beam_width=10, num_top=1):
+    def __init__(self, model_path=None, use_gpu=True, batch_size=256, gpu_mem_frac=0.1, beam_width=10, num_top=1):
+        if model_path is None:
+            model_path = os.path.abspath(os.path.join(os.path.dirname( __file__ ), 'default_model'))
         self.num_top = num_top
         self.use_gpu = use_gpu
         parser = argparse.ArgumentParser()
