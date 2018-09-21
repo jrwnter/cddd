@@ -12,8 +12,8 @@ FLAGS=None
 
 def add_arguments(parser):
     parser.add_argument('-i', '--input', help='input .txt file with one SMILES per row.', type=str)
-    parser.add_argument('-o', '--output', help='output .txt file with a descriptor for each SMILES per row, delimeted by tab.', type=str)
-    parser.add_argument('--smiles_header', help='specify the name of the SMILES column header here', default="smiles", type=str)
+    parser.add_argument('-o', '--output', help='output .csv file with a descriptor for each SMILES per row.', type=str)
+    parser.add_argument('--smiles_header', help='if .csv, specify the name of the SMILES column header here.', default="smiles", type=str)
     parser.add_argument('--preprocess', dest='preprocess', action='store_true')
     parser.add_argument('--no-preprocess', dest='preprocess', action='store_false')
     parser.set_defaults(preprocess=True)
@@ -27,7 +27,7 @@ def read_input():
     if file.endswith('.csv'):
         df = pd.read_csv(file)
     if file.endswith('.smi'):
-        df = pd.read_table(file)
+        df = pd.read_table(file, header=None).rename({0:FLAGS.smiles_header, 1:"ID"}, axis=1)
     return df
     
     
