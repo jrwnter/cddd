@@ -26,6 +26,6 @@ Supported input:
   * .csv-file with one SMILES per row
   * .smi-file with one SMILES per row
 
-Specify the header of the SMILES column with the flag --smiles_header (default: smiles)
+For .csv: Specify the header of the SMILES column with the flag --smiles_header (default: smiles)
 
 
