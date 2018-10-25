@@ -5,8 +5,6 @@ import tensorflow as tf
 from abc import ABC, abstractmethod
 from tensorflow.contrib import seq2seq
 
-#TODO: tanh as activation for dense layer after latent space?
-
 class BaseModel(ABC):
     def __init__(self, mode, iterator, hparams):
         self.mode = mode
@@ -26,6 +24,12 @@ class BaseModel(ABC):
         self.batch_size = hparams.batch_size
         self.rand_input_swap = hparams.rand_input_swap
         self.measures_to_log = {}
+        if hparams.emb_activation == "tanh":
+            self.emb_activation = tf.nn.tanh
+        elif hparams.emb_activation == "linear":
+            self.emb_activation = lambda x: x
+        else:
+            raise ValueError("This activationfunction is not implemented...")
         if mode == "TRAIN":
             self.lr = hparams.lr
             self.lr_decay = hparams.lr_decay
@@ -220,7 +224,7 @@ class GRUSeq2Seq(BaseModel):
                                                            time_major=False)
         emb = tf.layers.dense(tf.concat(encoder_state, axis=1),
                               self.embedding_size,
-                              activation=tf.nn.tanh
+                              activation=self.emb_activation
                              )
         return embgit 
 
@@ -290,7 +294,7 @@ class NoisyGRUSeq2Seq(GRUSeq2Seq):
                              )
         if (self.mode == "TRAIN") & (self.emb_noise > 0.0):
             emb += tf.random_normal(shape=tf.shape(emb), mean=0.0, stddev=self.emb_noise, dtype=tf.float32)
-        emb = tf.tanh(emb)
+        emb = self.emb_activation(emb)
         return emb
     
 class LSTMSeq2Seq(BaseModel):
@@ -309,7 +313,7 @@ class LSTMSeq2Seq(BaseModel):
         encoder_state_c = [state.c for state in encoder_state]
         emb = tf.layers.dense(tf.concat(encoder_state_c, axis=1),
                               self.embedding_size,
-                              activation=tf.nn.tanh
+                              activation=self.emb_activation
                              )
         return emb
 
@@ -349,7 +353,7 @@ class Conv2GRUSeq2Seq(GRUSeq2Seq):
         
         emb = tf.layers.dense(tf.reduce_mean(x, axis=1),
                               self.embedding_size,
-                              activation=tf.nn.tanh
+                              activation=self.emb_activation
                              )
         return emb
 
@@ -458,6 +462,6 @@ class NoisyGRUSeq2SeqWithFeatures(GRUSeq2SeqWithFeatures):
                              )
         if (self.emb_noise >= 0) & (self.mode == "TRAIN"):
             emb += tf.random_normal(shape=tf.shape(emb), mean=0.0, stddev=self.emb_noise, dtype=tf.float32)
-        emb = tf.tanh(emb)
+        emb = self.emb_activation(emb)
         return emb
         

@@ -11,7 +11,7 @@ def add_arguments(parser):
                         help='hidden layers of cell. multiple numbers for multi layer rnn',
                         nargs='+', default=[128], type=int)
     parser.add_argument('-e','--emb_size', help='size of bottleneck layer', default=128, type=int)
-    parser.add_argument('-l','--learning_rate', default=0.0005, type=int)
+    parser.add_argument('-l','--learning_rate', default=0.0005, type=float)
     parser.add_argument('-s','--save_dir', help='path to save and log files', default=".", type=str)
     parser.add_argument('-d','--device', help="number of cuda visible devise", default="-1", type=str)
     parser.add_argument('-gmf', '--gpu_mem_frac', default=1.0, type=float)
@@ -47,6 +47,7 @@ def add_arguments(parser):
     parser.add_argument('--hparams_file_name', default=None, type=str)
     parser.add_argument('--rand_input_swap', default=False, type=bool)
     parser.add_argument('--infer_input', default="random", type=str)
+    parser.add_argument('--emb_activation', default="tanh", type=str)
     
     
     
@@ -91,6 +92,7 @@ def create_hparams(flags):
         num_features = flags.num_features,
         rand_input_swap = flags.rand_input_swap,
         infer_input = flags.infer_input,
+        emb_activation = flags.emb_activation,
     )
     hparams_file_name = flags.hparams_file_name
     if hparams_file_name is None:

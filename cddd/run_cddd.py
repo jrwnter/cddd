@@ -11,7 +11,7 @@ from cddd.preprocessing import preprocess_smiles
 FLAGS=None
 
 def add_arguments(parser):
-    parser.add_argument('-i', '--input', help='input .txt file with one SMILES per row.', type=str)
+    parser.add_argument('-i', '--input', type=str)
     parser.add_argument('-o', '--output', help='output .csv file with a descriptor for each SMILES per row.', type=str)
     parser.add_argument('--smiles_header', help='if .csv, specify the name of the SMILES column header here.', default="smiles", type=str)
     parser.add_argument('--preprocess', dest='preprocess', action='store_true')
@@ -19,7 +19,7 @@ def add_arguments(parser):
     parser.set_defaults(preprocess=True)
     parser.add_argument('--model_path', default="default", type=str)
     parser.add_argument('--gpu', default=True, type=bool)
-    parser.add_argument('--device', default="0", type=str)
+    parser.add_argument('--device', default="2", type=str)
     parser.add_argument('--batch_size', default=512, type=int)
     
 def read_input():
@@ -27,7 +27,9 @@ def read_input():
     if file.endswith('.csv'):
         df = pd.read_csv(file)
     if file.endswith('.smi'):
-        df = pd.read_table(file, header=None).rename({0:FLAGS.smiles_header, 1:"ID"}, axis=1)
+        df = pd.read_table(file, header=None).rename({0:FLAGS.smiles_header, 1:"EXTREG"}, axis=1)
+    else:
+        raise ValueError("use .csv or .smi format...")
     return df
     
     

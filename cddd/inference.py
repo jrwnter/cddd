@@ -40,22 +40,8 @@ def embedding2sequence(model, hparams, embedding, num_top=1):
             return seq_list[0]
     return seq_list
 
-def calculate_descriptor(sml_list, model_path, batch_size=256, gpu_mem_frac=0.1):
-    parser = argparse.ArgumentParser()
-    add_arguments(parser)
-    flags, unparsed = parser.parse_known_args()
-    flags.hparams_from_file = True
-    flags.save_dir = model_path
-    hparams = create_hparams(flags)
-    hparams.set_hparam("save_dir", model_path)
-    hparams.set_hparam("batch_size", batch_size)
-    hparams.set_hparam("gpu_mem_frac", gpu_mem_frac)
-    encode_model = build_models(hparams, modes="ENCODE")
-    embedding = sequence2embedding(encode_model, hparams, sml_list)
-    return embedding
-
 class InferenceModel():
-    def __init__(self, model_path=None, use_gpu=True, batch_size=256, gpu_mem_frac=0.1, beam_width=10, num_top=1):
+    def __init__(self, model_path=None, use_gpu=True, batch_size=256, gpu_mem_frac=0.1, beam_width=10, num_top=1, emb_activation=None):
         if model_path is None:
             model_path = os.path.abspath(os.path.join(os.path.dirname( __file__ ), 'default_model'))
         self.num_top = num_top
@@ -70,6 +56,8 @@ class InferenceModel():
         self.hparams.set_hparam("batch_size", batch_size)
         self.hparams.set_hparam("gpu_mem_frac", gpu_mem_frac)
         self.hparams.add_hparam("beam_width", beam_width)
+        if emb_activation is not None:
+            self.hparams.set_hparam("emb_activation", emb_activation)
         self.encode_model, self.decode_model = build_models(self.hparams, modes=["ENCODE", "DECODE"])
         
     def sml_to_emb(self, smls):
