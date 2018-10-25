@@ -20,8 +20,6 @@ def add_arguments(parser):
     parser.add_argument('--inference_freq', default=5000, type=int)
     parser.add_argument('--batch_size', default=64, type=int)
     parser.add_argument('--char_embedding_size', default=32, type=int)
-    parser.add_argument('--encode_vocabulary_file', default=os.path.join(defaul_data_dir, "indices_char.npy"), type=str)
-    parser.add_argument('--decode_vocabulary_file', default=os.path.join(defaul_data_dir, "indices_char.npy"), type=str)
     parser.add_argument('--train_file', default="../data/pretrain_dataset.tfrecords", type=str)
     parser.add_argument('--val_file', default="../data/pretrain_dataset_val.tfrecords", type=str)
     parser.add_argument('--infer_file', default="../data/val_dataset_preprocessed3.csv", type=str)
@@ -69,8 +67,6 @@ def create_hparams(flags):
         inference_freq = flags.inference_freq,
         batch_size = flags.batch_size,
         char_embedding_size = flags.char_embedding_size,
-        encode_vocabulary_file = flags.encode_vocabulary_file,
-        decode_vocabulary_file = flags.decode_vocabulary_file,
         train_file = flags.train_file,
         val_file = flags.val_file,
         infer_file = flags.infer_file,
@@ -100,4 +96,7 @@ def create_hparams(flags):
     if flags.hparams_from_file:
         hparams.cell_size = list()
         hparams = hparams.parse_json(json.load(open(hparams_file_name)))
+        
+    hparams.add_hparam("encode_vocabulary_file", os.path.join(defaul_data_dir, "indices_char.npy"))
+    hparams.add_hparam("decode_vocabulary_file", os.path.join(defaul_data_dir, "indices_char.npy"))
     return hparams

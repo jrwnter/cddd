@@ -41,7 +41,7 @@ def embedding2sequence(model, hparams, embedding, num_top=1):
     return seq_list
 
 class InferenceModel():
-    def __init__(self, model_path=None, use_gpu=True, batch_size=256, gpu_mem_frac=0.1, beam_width=10, num_top=1, emb_activation=None):
+    def __init__(self, model_path=None, use_gpu=True, batch_size=256, gpu_mem_frac=0.1, infer_decode="beam_search", beam_width=10, num_top=1, emb_activation=None):
         if model_path is None:
             model_path = os.path.abspath(os.path.join(os.path.dirname( __file__ ), 'default_model'))
         self.num_top = num_top
@@ -55,6 +55,7 @@ class InferenceModel():
         self.hparams.set_hparam("save_dir", model_path)
         self.hparams.set_hparam("batch_size", batch_size)
         self.hparams.set_hparam("gpu_mem_frac", gpu_mem_frac)
+        self.hparams.add_hparam("infer_decode", infer_decode)
         self.hparams.add_hparam("beam_width", beam_width)
         if emb_activation is not None:
             self.hparams.set_hparam("emb_activation", emb_activation)

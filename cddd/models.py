@@ -37,6 +37,7 @@ class BaseModel(ABC):
             self.lr_decay_factor = hparams.lr_decay_factor
         
         if mode == "DECODE":
+            self.infer_decode = hparams.infer_decode
             self.beam_width = hparams.beam_width
         
         if mode not in ["TRAIN", "EVAL", "ENCODE", "DECODE"]:
@@ -183,6 +184,7 @@ class BaseModel(ABC):
     def emb2seq(self, sess, embedding, num_top):
         assert self.mode == "DECODE"
         output_seq = sess.run(self.output_ids, {self.encoded_seq: embedding})
+        #print(output_seq.shape)
         return [[self.idx_to_char(seq[:, i]) for i in range(num_top)] for seq in output_seq]
     
     def initilize(self, sess, overwrite_saves=False):
@@ -226,7 +228,7 @@ class GRUSeq2Seq(BaseModel):
                               self.embedding_size,
                               activation=self.emb_activation
                              )
-        return embgit 
+        return emb
 
     def _decoder(self, encoded_seq, decoder_emb_inp=None):
         if self.reverse_decoding:
@@ -235,11 +237,11 @@ class GRUSeq2Seq(BaseModel):
         decoder_cell = tf.contrib.rnn.MultiRNNCell(decoder_cell)
         decoder_cell_inital = tf.layers.dense(encoded_seq, sum(self.cell_size))
         decoder_cell_inital = tuple(tf.split(decoder_cell_inital, self.cell_size, 1))
+        projection_layer = tf.layers.Dense(self.decode_voc_size, use_bias=False)
         if self.mode != "DECODE":
             helper = tf.contrib.seq2seq.TrainingHelper(decoder_emb_inp,
                                                        sequence_length=self.shifted_target_len,
                                                        time_major=False)
-            projection_layer = tf.layers.Dense(self.decode_voc_size, use_bias=False)
             decoder = tf.contrib.seq2seq.BasicDecoder(decoder_cell,
                                                       helper,
                                                       decoder_cell_inital,
@@ -248,9 +250,8 @@ class GRUSeq2Seq(BaseModel):
                                                                          impute_finished=True,
                                                                          output_time_major=False)
             return outputs.rnn_output
-        else:
+        elif self.infer_decode == "beam_search":
             decoder_cell_inital = tf.contrib.seq2seq.tile_batch(decoder_cell_inital, self.beam_width)
-            projection_layer = tf.layers.Dense(self.decode_voc_size, use_bias=False)
             start_tokens = tf.fill([tf.shape(encoded_seq)[0]], self.decode_vocabulary['<s>'])
             end_token = self.decode_vocabulary['</s>']
             decoder = tf.contrib.seq2seq.BeamSearchDecoder(
@@ -271,6 +272,26 @@ class GRUSeq2Seq(BaseModel):
             )
 
             return outputs.predicted_ids
+        elif self.infer_decode == "sampling":
+            start_tokens = tf.fill([tf.shape(encoded_seq)[0]], self.decode_vocabulary['<s>'])
+            end_token = self.decode_vocabulary['</s>']
+            helper = tf.contrib.seq2seq.SampleEmbeddingHelper(
+                embedding=self.decoder_embedding,
+                start_tokens=start_tokens,
+                end_token=end_token
+            )
+
+            decoder = tf.contrib.seq2seq.BasicDecoder(decoder_cell,
+                                                      helper,
+                                                      decoder_cell_inital,
+                                                      output_layer=projection_layer)
+            outputs, output_state, _ = tf.contrib.seq2seq.dynamic_decode(
+                decoder=decoder,
+                impute_finished=False,
+                output_time_major=False,
+                maximum_iterations = 1000
+            )
+            return [outputs.sample_id]
         
 class NoisyGRUSeq2Seq(GRUSeq2Seq):
     def __init__(self, mode, iterator, hparams):
