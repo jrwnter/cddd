@@ -113,7 +113,6 @@ run2.sh
 *.ipynb
 *.pkl
 *.png
-*.csv
 *.html
 
 
