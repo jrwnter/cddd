@@ -3,7 +3,6 @@
 Implementation of the Paper "Learning Continuous and Data-Driven Molecular
 Descriptors by Translating Equivalent Chemical Representations" by Robin Winter, Floriane Montanari, Frank Noe and Djork-Arne Clevert.
 
-![alt text](https://by-gitlab.de.bayer.cnb/GGWAQ/cddd/edit/master/example/model.png?raw=true)
 ## Installing
 
 ### Prerequisites
@@ -70,6 +69,7 @@ The infernce model instance can also be used to decode a molecule embedding back
 ```
 decoded_smiles_list = inference_model.emb_to_seq(smiles_embedding)
 ```
-
+### References
+https://pubs.rsc.org/en/content/articlelanding/2019/sc/c8sc04175j#!divAbstract
 
 
