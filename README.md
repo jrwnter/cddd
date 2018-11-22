@@ -57,11 +57,11 @@ ames_df = pd.read_csv("example/ames.csv", index_col=0)
 ames_df["smiles_preprocessed"] = ames_df.smiles.map(preprocess_smiles)
 smiles_list = ames_df["smiles_preprocessed"].tolist()
 ```
-Create a instance of the inferce class:
+Create a instance of the inference class:
 ```
 inference_model = InferenceModel()
 ```
-Encode all SMILES into the contineous embedding (molecular descriptor):
+Encode all SMILES into the continuous embedding (molecular descriptor):
 ```
 smiles_embedding = inference_model.seq_to_emb(smiles_list)
 ```
