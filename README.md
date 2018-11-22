@@ -17,14 +17,11 @@ scikit-learn
 ### Conda
 Create a new enviorment:
 ```
-conda env create –f environment.yml
-source activate cddd
-```
-Download and install the cddd package:
-```
 git clone git@by-gitlab.de.bayer.cnb:GGWAQ/cddd.git
 cd cddd
-pip install cddd
+conda env create –f environment.yml
+source activate cddd
+pip install .
 ```
 
 ## Getting Started
