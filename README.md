@@ -72,6 +72,7 @@ The infernce model instance can also be used to decode a molecule embedding back
 decoded_smiles_list = inference_model.emb_to_seq(smiles_embedding)
 ```
 ### References
-[1] https://pubs.rsc.org/en/content/articlelanding/2019/sc/c8sc04175j#!divAbstract
-
+[1] R. Winter, F. Montanari, F. Noe and D. Clevert, Chem. Sci, 2019, https://pubs.rsc.org/en/content/articlelanding/2019/sc/c8sc04175j#!divAbstract
+[2] K. Hansen, S. Mika, T. Schroeter, A. Sutter, A. Ter Laak, T. Steger-Hartmann, N. Heinrich and K.-R. MuÌ´Lller, J. Chem. Inf. Model., 2009, 49, 2077–2081.
+[3] Z. Wu, B. Ramsundar, E. N. Feinberg, J. Gomes, C. Geniesse, A. S. Pappu, K. Leswing and V. Pande, Chemical Science, 2018, 9, 513–530.
 
