@@ -2,8 +2,7 @@
 
 Implementation of the Paper "Learning Continuous and Data-Driven Molecular
 Descriptors by Translating Equivalent Chemical Representations" by Robin Winter, Floriane Montanari, Frank Noe and Djork-Arne Clevert.<sup>1</sup>
-![](example/model.png =100x20) 
-<img src="example/model.png" width="100" height="100">
+<img src="example/model.png" width="50%" height="50%">
 ## Installing
 
 ### Prerequisites
