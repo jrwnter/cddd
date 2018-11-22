@@ -26,7 +26,7 @@ pip install .
 ```
 
 ### Testing
-Extract molecular descriptors from two QSAR datasets and evaluate the perfromance of a SVM trained on these descriptors.
+Extract molecular descriptors from two QSAR datasets (ref. 2,3) and evaluate the perfromance of a SVM trained on these descriptors.
 ```
 cd example
 python3 run_qsar_test.py
