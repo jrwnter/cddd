@@ -25,6 +25,11 @@ source activate cddd
 pip install .
 ```
 
+### Downloading Pretrained Model
+A pretrained model as described in ref. 1 is available on Google Drive. Download and unzip py execuiting the bash script "download_pretrained_model.sh":
+```
+./download_pretrained_model.sh
+``./download_pretrained_model.sh`
 ### Testing
 Extract molecular descriptors from two QSAR datasets (ref. 2,3) and evaluate the perfromance of a SVM trained on these descriptors.
 ```

@@ -114,4 +114,5 @@ run2.sh
 *.pkl
 *.png
 *.html
-*.ckpt.data-00000-of-00001
+cddd/default_model/
+*.zip
