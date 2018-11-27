@@ -29,7 +29,7 @@ def add_arguments(parser):
     Returns:
         None
     """
-    parser.add_argument('--model_path', default="default", type=str)
+    parser.add_argument('--model_dir', default="../default_model", type=str)
     parser.add_argument('--gpu', default=True, type=bool)
     parser.add_argument('--device', default="0", type=str)
 
@@ -38,12 +38,9 @@ def main(unused_argv):
     meaningfull features for a QSAR modelling"""
     if FLAGS.gpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = str(FLAGS.device)
-    if FLAGS.model_path == "default":
-        model_path = None
-    else:
-        model_path = FLAGS.model_path
+        model_dir = FLAGS.model_dir
 
-    infer_model = InferenceModel(model_path)
+    infer_model = InferenceModel(model_dir)
     ames_df = pd.read_csv("ames.csv")
     ames_smls = ames_df.smiles.tolist()
     ames_labels = ames_df.label.values

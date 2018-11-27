@@ -64,13 +64,12 @@ def embedding2sequence(model, hparams, embedding, num_top=1):
 
 class InferenceModel(object):
     """Class that handles the inference of a trained model."""
-    def __init__(self, model_dir=None, use_gpu=True, batch_size=256,
+    def __init__(self, model_dir, use_gpu=True, batch_size=256,
                  gpu_mem_frac=0.1, beam_width=10, num_top=1, emb_activation=None):
         """Constructor for the inference model.
 
         Args:
-            model_dir: Path to the model directory. If None, a model in the directory
-            default_model is expected.
+            model_dir: Path to the model directory.
             use_gpu: Flag for GPU usage.
             batch_size: Number of samples to process per step.
             gpu_mem_frac: If GPU is used, what memory fraction should be used?
@@ -80,8 +79,6 @@ class InferenceModel(object):
         Returns:
             None
         """
-        if model_dir is None:
-            model_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'default_model'))
         self.num_top = num_top
         self.use_gpu = use_gpu
         parser = argparse.ArgumentParser()
