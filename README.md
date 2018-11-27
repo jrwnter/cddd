@@ -26,10 +26,9 @@ pip install .
 ```
 
 ### Downloading Pretrained Model
-A pretrained model as described in ref. 1 is available on Google Drive. Download and unzip py execuiting the bash script "download_pretrained_model.sh":
+A pretrained model as described in ref. 1 is available on Google Drive. Download and unzip py execuiting the bash script "download_default_model.sh":
 ```
-./download_pretrained_model.sh
-./download_pretrained_model.sh
+./download_default_model.sh
 ```
 
 ### Testing
