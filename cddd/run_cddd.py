@@ -31,7 +31,8 @@ def add_arguments(parser):
     parser.add_argument('--no-preprocess', dest='preprocess', action='store_false')
     parser.set_defaults(preprocess=True)
     parser.add_argument('--model_dir', default="default_model", type=str)
-    parser.add_argument('--gpu', default=True, type=bool)
+    parser.add_argument('--use_gpu', dest='gpu', action='store_true')
+    parser.set_defaults(gpu=False)
     parser.add_argument('--device', default="2", type=str)
     parser.add_argument('--batch_size', default=512, type=int)
 
@@ -57,7 +58,7 @@ def main(unused_argv):
     """Main function that extracts the contineous data-driven descriptors for a file of SMILES."""
     if FLAGS.gpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = str(FLAGS.device)
-        model_dir = FLAGS.model_dir
+    model_dir = FLAGS.model_dir
 
     file = FLAGS.input
     df = read_input(file)

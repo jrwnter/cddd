@@ -114,5 +114,5 @@ run2.sh
 *.pkl
 *.png
 *.html
-cddd/default_model/
+default_model/
 *.zip

@@ -30,7 +30,8 @@ def add_arguments(parser):
         None
     """
     parser.add_argument('--model_dir', default="../default_model", type=str)
-    parser.add_argument('--gpu', default=True, type=bool)
+    parser.add_argument('--use_gpu', dest='gpu', action='store_true')
+    parser.set_defaults(gpu=False)
     parser.add_argument('--device', default="0", type=str)
 
 def main(unused_argv):
@@ -38,13 +39,14 @@ def main(unused_argv):
     meaningfull features for a QSAR modelling"""
     if FLAGS.gpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = str(FLAGS.device)
-        model_dir = FLAGS.model_dir
-
-    infer_model = InferenceModel(model_dir)
+    model_dir = FLAGS.model_dir
+    
+    infer_model = InferenceModel(model_dir, use_gpu=FLAGS.gpu)
     ames_df = pd.read_csv("ames.csv")
     ames_smls = ames_df.smiles.tolist()
     ames_labels = ames_df.label.values
     ames_fold = ames_df.fold.values
+    print("Extracting molecular desscriptors for Ames")
     ames_emb = infer_model.seq_to_emb(ames_smls)
     ames_emb = (ames_emb - ames_emb.mean()) / ames_emb.std()
 
@@ -52,6 +54,7 @@ def main(unused_argv):
     lipo_smls = lipo_df.smiles.tolist()
     lipo_labels = lipo_df.label.values
     lipo_fold = lipo_df.fold.values
+    print("Extracting molecular desscriptors for Lipophilicity")
     lipo_emb = infer_model.seq_to_emb(lipo_smls)
     lipo_emb = (lipo_emb - lipo_emb.mean()) / lipo_emb.std()
 
