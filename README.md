@@ -26,7 +26,7 @@ pip install .
 ```
 
 ### Downloading Pretrained Model
-A pretrained model as described in ref. 1 is available on Google Drive. Download and unzip py execuiting the bash script "download_default_model.sh":
+A pretrained model as described in ref. 1 is available on Google Drive. Download and unzip by execuiting the bash script "download_default_model.sh":
 ```
 ./download_default_model.sh
 ```
@@ -38,6 +38,7 @@ cd example
 python3 run_qsar_test.py
 ```
 The accuracy on the Ames dataset should be arround 0.814 +/- 0.006.
+
 The r2 on the Lipophilicity dataset should be arround 0.731 +/- 0.029.
 
 ## Getting Started
