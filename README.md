@@ -18,7 +18,7 @@ scikit-learn
 ### Conda
 Create a new enviorment:
 ```
-git clone git@by-gitlab.de.bayer.cnb:GGWAQ/cddd.git
+git clone https://github.com/jrwnter/cddd.git
 cd cddd
 conda env create –f environment.yml
 source activate cddd
