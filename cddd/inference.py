@@ -64,12 +64,13 @@ def embedding2sequence(model, hparams, embedding, num_top=1):
 
 class InferenceModel(object):
     """Class that handles the inference of a trained model."""
-    def __init__(self, model_path=None, use_gpu=True, batch_size=256,
+    def __init__(self, model_dir=None, use_gpu=True, batch_size=256,
                  gpu_mem_frac=0.1, beam_width=10, num_top=1, emb_activation=None):
         """Constructor for the inference model.
 
         Args:
-            model_path: Path to the model save file.
+            model_dir: Path to the model directory. If None, a model in the directory
+            default_model is expected.
             use_gpu: Flag for GPU usage.
             batch_size: Number of samples to process per step.
             gpu_mem_frac: If GPU is used, what memory fraction should be used?
@@ -79,17 +80,17 @@ class InferenceModel(object):
         Returns:
             None
         """
-        if model_path is None:
-            model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'default_model'))
+        if model_dir is None:
+            model_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'default_model'))
         self.num_top = num_top
         self.use_gpu = use_gpu
         parser = argparse.ArgumentParser()
         add_arguments(parser)
         flags = parser.parse_args([])
         flags.hparams_from_file = True
-        flags.save_dir = model_path
+        flags.save_dir = model_dir
         self.hparams = create_hparams(flags)
-        self.hparams.set_hparam("save_dir", model_path)
+        self.hparams.set_hparam("save_dir", model_dir)
         self.hparams.set_hparam("batch_size", batch_size)
         self.hparams.set_hparam("gpu_mem_frac", gpu_mem_frac)
         self.hparams.add_hparam("beam_width", beam_width)
