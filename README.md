@@ -30,7 +30,7 @@ A pretrained model as described in ref. 1 is available on Google Drive. Download
 ```
 ./download_default_model.sh
 ```
-
+The default_model.zip file can also be downloaded manualy under https://drive.google.com/open?id=1oyknOulq_j0w9kzOKKIHdTLo5HphT99h
 ### Testing
 Extract molecular descriptors from two QSAR datasets (ref. 2,3) and evaluate the perfromance of a SVM trained on these descriptors.
 ```
