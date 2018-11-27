@@ -12,7 +12,7 @@ setup(
    #install_requires=['tensorflow'], #external packages as dependencies
    entry_points={
       'console_scripts': [
-        'cddd = cddd.run_cddd:main',
+        'cddd = cddd.run_cddd:main_wrapper',
     ],
    },
 )
