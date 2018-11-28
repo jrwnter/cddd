@@ -10,4 +10,9 @@ setup(
    package_data={'cddd': ['data/*', 'default_model/*']},
    include_package_data=True,
    #install_requires=['tensorflow'], #external packages as dependencies
+   entry_points={
+      'console_scripts': [
+        'cddd = cddd.run_cddd:main_wrapper',
+    ],
+   },
 )
