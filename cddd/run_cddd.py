@@ -47,7 +47,7 @@ def read_input(file):
     """
     if file.endswith('.csv'):
         sml_df = pd.read_csv(file)
-    if file.endswith('.smi'):
+    elif file.endswith('.smi'):
         sml_df = pd.read_table(file, header=None).rename({0:FLAGS.smiles_header, 1:"EXTREG"},
                                                          axis=1)
     else:
@@ -88,6 +88,7 @@ def main(unused_argv):
     df.to_csv(FLAGS.output)
 
 def main_wrapper():
+    global FLAGS
     PARSER = argparse.ArgumentParser()
     add_arguments(PARSER)
     FLAGS, UNPARSED = PARSER.parse_known_args()

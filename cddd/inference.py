@@ -104,9 +104,11 @@ class InferenceModel(object):
         Returns:
             Embedding of the input sequnce(s).
         """
+        print(self.use_gpu)
         if isinstance(seq, str):
             seq = [seq]
         if self.use_gpu:
+            print("using gpu...")
             emb = sequence2embedding(self.encode_model, self.hparams, seq)
         else:
             with tf.device("/cpu:0"):

@@ -20,7 +20,17 @@ Create a new enviorment:
 ```bash
 git clone https://github.com/jrwnter/cddd.git
 cd cddd
-conda env create -f environment.yml
+```
+Without GPU support:
+```bash
+conda env create -f environment_cpu.yml
+```
+With GPU support:
+```bash
+conda env create -f environment_gpu.yml
+```
+Activate the new environment and install the cddd package:
+```bash
 source activate cddd
 pip install .
 ```
