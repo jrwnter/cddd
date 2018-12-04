@@ -1,0 +1,11 @@
+name: cddd
+
+channels:
+  - rdkit
+  - defaults
+
+dependencies:
+  - anaconda::python=3.5.5
+  - rdkit::rdkit=2018.03.3.0
+  - anaconda::tensorflow=1.10
+  - anaconda::scikit-learn=0.19.1
