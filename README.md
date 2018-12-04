@@ -20,7 +20,7 @@ Create a new enviorment:
 ```
 git clone https://github.com/jrwnter/cddd.git
 cd cddd
-conda env create –f environment.yml
+conda env create -f environment.yml
 source activate cddd
 pip install .
 ```
