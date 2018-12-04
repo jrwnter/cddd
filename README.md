@@ -17,7 +17,7 @@ scikit-learn
 ```
 ### Conda
 Create a new enviorment:
-```
+```bash
 git clone https://github.com/jrwnter/cddd.git
 cd cddd
 conda env create -f environment.yml
@@ -27,13 +27,13 @@ pip install .
 
 ### Downloading Pretrained Model
 A pretrained model as described in ref. 1 is available on Google Drive. Download and unzip by execuiting the bash script "download_default_model.sh":
-```
+```bash
 ./download_default_model.sh
 ```
 The default_model.zip file can also be downloaded manualy under https://drive.google.com/open?id=1oyknOulq_j0w9kzOKKIHdTLo5HphT99h
 ### Testing
 Extract molecular descriptors from two QSAR datasets (ref. 2,3) and evaluate the perfromance of a SVM trained on these descriptors.
-```
+```bash
 cd example
 python3 run_qsar_test.py
 ```
@@ -44,8 +44,8 @@ The r2 on the Lipophilicity dataset should be arround 0.731 +/- 0.029.
 ## Getting Started
 ### Extracting Molecular Descripotrs
 Run the script run_cddd.py to extract molecular descripotrs of your provided SMILES:
-```
-run_cddd.py --input smiles.smi --output descriptors.csv  --smiles_header smiles
+```bash
+cddd --input smiles.smi --output descriptors.csv  --smiles_header smiles
 ```
 Supported input: 
   * .csv-file with one SMILES per row
@@ -55,27 +55,27 @@ For .csv: Specify the header of the SMILES column with the flag --smiles_header 
 
 ### Inference Module
 The pretrained model can also be imported and used directly in python via the inference class:
-```
+```python
 import pandas as pd
 from cddd.inference import InferenceModel
 from cddd.preprocessing import preprocess_smiles
 ```
 Load and preprocess data:
-```
+```python
 ames_df = pd.read_csv("example/ames.csv", index_col=0)
 ames_df["smiles_preprocessed"] = ames_df.smiles.map(preprocess_smiles)
 smiles_list = ames_df["smiles_preprocessed"].tolist()
 ```
 Create a instance of the inference class:
-```
+```python
 inference_model = InferenceModel()
 ```
 Encode all SMILES into the continuous embedding (molecular descriptor):
-```
+```python
 smiles_embedding = inference_model.seq_to_emb(smiles_list)
 ```
 The infernce model instance can also be used to decode a molecule embedding back to a interpretable SMILES string:
-```
+```python
 decoded_smiles_list = inference_model.emb_to_seq(smiles_embedding)
 ```
 ### References

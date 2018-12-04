@@ -87,8 +87,11 @@ def main(unused_argv):
     print("writing descriptors to file...")
     df.to_csv(FLAGS.output)
 
-if __name__ == "__main__":
+def main_wrapper():
     PARSER = argparse.ArgumentParser()
     add_arguments(PARSER)
     FLAGS, UNPARSED = PARSER.parse_known_args()
     tf.app.run(main=main, argv=[sys.argv[0]] + UNPARSED)
+    
+if __name__ == "__main__":
+    main_wrapper()
