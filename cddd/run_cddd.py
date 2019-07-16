@@ -34,6 +34,7 @@ def add_arguments(parser):
     parser.add_argument('--use_gpu', dest='gpu', action='store_true')
     parser.set_defaults(gpu=False)
     parser.add_argument('--device', default="2", type=str)
+    parser.add_argument('--cpu_threads', default=5, type=int)
     parser.add_argument('--batch_size', default=512, type=int)
 
 def read_input(file):
@@ -71,7 +72,8 @@ def main(unused_argv):
     print("start calculating descriptors...")
     infer_model = InferenceModel(model_dir=model_dir,
                                  use_gpu=FLAGS.gpu,
-                                 batch_size=FLAGS.batch_size)
+                                 batch_size=FLAGS.batch_size,
+                                 cpu_threads=FLAGS.cpu_threads)
     descriptors = infer_model.seq_to_emb(sml_list)
     print("finished calculating descriptors! %d out of %d input SMILES could be interpreted"
           %(len(sml_list), len(df)))
