@@ -17,7 +17,6 @@ scikit-learn
 ```
 ### Conda
 Create a new enviorment:
-<<<<<<< HEAD
 ```bash
 git clone https://github.com/jrwnter/cddd.git
 cd cddd
