@@ -6,7 +6,10 @@ import pandas as pd
 import tensorflow as tf
 from cddd.inference import InferenceModel
 from cddd.preprocessing import preprocess_smiles
+from cddd.hyperparameters import DEFAULT_DATA_DIR
+_default_model_dir = os.path.join(DEFAULT_DATA_DIR, 'default_model')
 FLAGS = None
+
 def add_arguments(parser):
     """Helper function to fill the parser object.
 
@@ -30,7 +33,7 @@ def add_arguments(parser):
     parser.add_argument('--preprocess', dest='preprocess', action='store_true')
     parser.add_argument('--no-preprocess', dest='preprocess', action='store_false')
     parser.set_defaults(preprocess=True)
-    parser.add_argument('--model_dir', default="default_model", type=str)
+    parser.add_argument('--model_dir', default=_default_model_dir, type=str)
     parser.add_argument('--use_gpu', dest='gpu', action='store_true')
     parser.set_defaults(gpu=False)
     parser.add_argument('--device', default="2", type=str)

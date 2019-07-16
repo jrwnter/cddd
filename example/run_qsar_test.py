@@ -18,6 +18,9 @@ import tensorflow as tf
 from sklearn.svm import SVC, SVR
 from sklearn.model_selection import cross_val_score, LeaveOneGroupOut
 from cddd.inference import InferenceModel
+from cddd.hyperparameters import DEFAULT_DATA_DIR
+_default_model_dir = os.path.join(DEFAULT_DATA_DIR, 'default_model')
+
 
 FLAGS = None
 
@@ -29,9 +32,9 @@ def add_arguments(parser):
     Returns:
         None
     """
-    parser.add_argument('--model_dir', default="../default_model", type=str)
+    parser.add_argument('--model_dir', default=_default_model_dir, type=str)
     parser.add_argument('--use_gpu', dest='gpu', action='store_true')
-    parser.set_defaults(gpu=False)
+    parser.set_defaults(gpu= False)
     parser.add_argument('--device', default="0", type=str)
     parser.add_argument('--cpu_threads', default=5, type=int)
 
