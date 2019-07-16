@@ -77,7 +77,8 @@ def embedding2sequence(model, hparams, embedding, num_top=1, maximum_iterations=
 class InferenceModel(object):
     """Class that handles the inference of a trained model."""
     def __init__(self, model_dir=_default_model_dir, use_gpu=True, batch_size=256,
-                 gpu_mem_frac=0.1, beam_width=10, num_top=1, maximum_iterations=1000, emb_activation=None):
+                 gpu_mem_frac=0.1, beam_width=10, num_top=1, maximum_iterations=1000,
+                 cpu_threads=5, emb_activation=None):
         """Constructor for the inference model.
 
         Args:
@@ -103,6 +104,7 @@ class InferenceModel(object):
         self.hparams.set_hparam("batch_size", batch_size)
         self.hparams.set_hparam("gpu_mem_frac", gpu_mem_frac)
         self.hparams.add_hparam("beam_width", beam_width)
+        self.hparams.set_hparam("cpu_threads", cpu_threads)
         self.encode_model, self.decode_model = build_models(self.hparams,
                                                             modes=["ENCODE", "DECODE"])
         self.maximum_iterations = maximum_iterations

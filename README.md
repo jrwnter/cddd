@@ -55,7 +55,6 @@ The r2 on the Lipophilicity dataset should be arround 0.731 +/- 0.029.
 ## Getting Started
 ### Extracting Molecular Descripotrs
 Run the script run_cddd.py to extract molecular descripotrs of your provided SMILES:
-<<<<<<< HEAD
 ```bash
 cddd --input smiles.smi --output descriptors.csv  --smiles_header smiles
 ```

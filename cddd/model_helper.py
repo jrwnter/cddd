@@ -31,7 +31,7 @@ Model = namedtuple("Model", ("graph", "model", "sess"))
 def create_model(mode, model_creator, input_pipeline_creator, hparams):
     """Helper function to build a translation model for a certain mode.
 
-    Args:
+    Args:cpu_threads
         mode: The mode the model is supposed to run(e.g. Train, EVAL, ENCODE, DECODE).
         model_creator: Type of model class (e.g. NoisyGRUSeq2SeqWithFeatures).
         input_pipeline_creator: Type of input pipeline class (e.g. InputPipelineWithFeatures).

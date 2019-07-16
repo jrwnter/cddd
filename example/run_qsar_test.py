@@ -33,6 +33,7 @@ def add_arguments(parser):
     parser.add_argument('--use_gpu', dest='gpu', action='store_true')
     parser.set_defaults(gpu=False)
     parser.add_argument('--device', default="0", type=str)
+    parser.add_argument('--cpu_threads', default=5, type=int)
 
 def main(unused_argv):
     """Main function to test the performance of the translation model to extract
@@ -44,7 +45,7 @@ def main(unused_argv):
         os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
     model_dir = FLAGS.model_dir
 
-    infer_model = InferenceModel(model_dir, use_gpu=FLAGS.gpu)
+    infer_model = InferenceModel(model_dir, use_gpu=FLAGS.gpu, cpu_threads=FLAGS.cpu_threads)
     ames_df = pd.read_csv("ames.csv")
     ames_smls = ames_df.smiles.tolist()
     ames_labels = ames_df.label.values
