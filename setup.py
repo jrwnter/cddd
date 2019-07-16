@@ -4,7 +4,7 @@ setup(
     name='cddd',
     version='0.1',
     packages=['cddd', 'cddd.data'],
-    package_data={'cddd': ['data/*', 'default_model/*']},
+    package_data={'cddd': ['data/*', 'data/default_model/']},
     include_package_data=True,
     url='',
     license='',

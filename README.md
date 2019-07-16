@@ -41,12 +41,16 @@ A pretrained model as described in ref. 1 is available on Google Drive. Download
 ```bash
 ./download_default_model.sh
 ```
-The default_model.zip file can also be downloaded manualy under https://drive.google.com/open?id=1oyknOulq_j0w9kzOKKIHdTLo5HphT99h . In the default settings the default model is expected to be located  in cddd/data .
+The default_model.zip file can also be downloaded manualy under https://drive.google.com/open?id=1oyknOulq_j0w9kzOKKIHdTLo5HphT99h
 ### Testing
 Extract molecular descriptors from two QSAR datasets (ref. 2,3) and evaluate the perfromance of a SVM trained on these descriptors.
 ```bash
 cd example
-python3 run_qsar_test.py
+python3 run_qsar_test.py --model_dir ../default_model
+```
+or with gpu support on e.g. device 0:
+```
+python3 run_qsar_test.py --model_dir ../default_model --use_gpu --device 0
 ```
 The accuracy on the Ames dataset should be arround 0.814 +/- 0.006.
 
