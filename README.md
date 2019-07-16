@@ -17,21 +17,23 @@ scikit-learn
 ```
 ### Conda
 Create a new enviorment:
+<<<<<<< HEAD
 ```bash
 git clone https://github.com/jrwnter/cddd.git
 cd cddd
-```
-Without GPU support:
-```bash
-conda env create -f environment_cpu.yml
-```
-With GPU support:
-```bash
-conda env create -f environment_gpu.yml
-```
-Activate the new environment and install the cddd package:
-```bash
+conda env create -f environment.yml
 source activate cddd
+```
+Install tensorflow without GPU support:
+```bash
+pip install --ignore-installed --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl
+```
+Or with GPU support:
+```bash
+pip install --ignore-installed --upgrade https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-1.10.0-cp36-cp36m-linux_x86_64.whl
+```
+And install the cddd package:
+```bash
 pip install .
 ```
 
@@ -54,6 +56,7 @@ The r2 on the Lipophilicity dataset should be arround 0.731 +/- 0.029.
 ## Getting Started
 ### Extracting Molecular Descripotrs
 Run the script run_cddd.py to extract molecular descripotrs of your provided SMILES:
+<<<<<<< HEAD
 ```bash
 cddd --input smiles.smi --output descriptors.csv  --smiles_header smiles
 ```
@@ -74,6 +77,7 @@ Load and preprocess data:
 ```python
 ames_df = pd.read_csv("example/ames.csv", index_col=0)
 ames_df["smiles_preprocessed"] = ames_df.smiles.map(preprocess_smiles)
+ames_df = ames_df.dropna()
 smiles_list = ames_df["smiles_preprocessed"].tolist()
 ```
 Create a instance of the inference class:

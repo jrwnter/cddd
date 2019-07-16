@@ -94,6 +94,9 @@ venv.bak/
 .spyderproject
 .spyproject
 
+# Pycharm
+.idea/
+
 # Rope project settings
 .ropeproject
 
@@ -107,11 +110,12 @@ venv.bak/
 saves/
 saves2/
 vs_benchmark/
+default_model/
 TODO.txt
 run.sh
 run2.sh
 *.ipynb
-*.pkl
+*.ipynb_checkpoints
 *.png
 *.html
 default_model/

@@ -55,17 +55,16 @@ class BaseModel(ABC):
         self.mode = mode
         self.iterator = iterator
         self.embedding_size = hparams.emb_size
-        if mode in ["TRAIN", "EVAL", "ENCODE"]:
-            self.encode_vocabulary = {
-                v: k for k, v in np.load(hparams.encode_vocabulary_file).item().items()
-            }
-            self.encode_voc_size = len(self.encode_vocabulary)
-        if mode in ["TRAIN", "EVAL", "DECODE"]:
-            self.decode_vocabulary = {
-                v: k for k, v in np.load(hparams.decode_vocabulary_file).item().items()
-            }
-            self.decode_vocabulary_reverse = {v: k for k, v in self.decode_vocabulary.items()}
-            self.decode_voc_size = len(self.decode_vocabulary)
+        self.encode_vocabulary = {
+            v: k for k, v in np.load(hparams.encode_vocabulary_file, allow_pickle=True).item().items()
+        }
+        self.encode_voc_size = len(self.encode_vocabulary)
+        self.decode_vocabulary = {
+            v: k for k, v in np.load(hparams.decode_vocabulary_file, allow_pickle=True).item().items()
+        }
+        self.decode_vocabulary_reverse = {v: k for k, v in self.decode_vocabulary.items()}
+        self.decode_voc_size = len(self.decode_vocabulary)
+        self.one_hot_embedding = hparams.one_hot_embedding
         self.char_embedding_size = hparams.char_embedding_size
         self.global_step = tf.get_variable('global_step',
                                            [],
@@ -131,12 +130,27 @@ class BaseModel(ABC):
                 self.encoded_seq = self._encoder(encoder_emb_inp)
 
         if self.mode == "DECODE":
-            self.decoder_embedding = tf.get_variable("char_embedding",
-                                                     [self.decode_voc_size,
-                                                      self.char_embedding_size])
+            if self.one_hot_embedding:
+                self.decoder_embedding = tf.one_hot(
+                    list(range(0, self.decode_voc_size)),
+                    self.decode_voc_size
+                )
+            elif self.encode_vocabulary == self.decode_vocabulary:
+                self.decoder_embedding = tf.get_variable(
+                    "char_embedding",
+                    [self.decode_voc_size, self.char_embedding_size]
+                )
+            else:
+                self.decoder_embedding = tf.get_variable(
+                    "char_embedding2",
+                    [self.decode_voc_size, self.char_embedding_size]
+                )
+
             with tf.name_scope("Input"):
                 self.encoded_seq = tf.placeholder(tf.float32,
                                                   [None, self.embedding_size])
+                self.maximum_iterations = tf.placeholder(tf.int32, [])
+                self.maximum_iterations = tf.placeholder(tf.int32, [])
 
             with tf.variable_scope("Decoder"):
                 self.output_ids = self._decoder(self.encoded_seq)
@@ -201,17 +215,31 @@ class BaseModel(ABC):
             encoder_emb_inp: Embedded input sequnce (contineous character embedding).
             decoder_emb_inp: Embedded input sequnce (contineous character embedding).
         """
-        self.encoder_embedding = tf.get_variable("char_embedding",
-                                                 [self.encode_voc_size, self.char_embedding_size])
+        if self.one_hot_embedding:
+            self.encoder_embedding = tf.one_hot(
+                list(range(0, self.encode_voc_size)),
+                self.encode_voc_size
+            )
+        else:
+            self.encoder_embedding = tf.get_variable(
+                "char_embedding",
+                [self.encode_voc_size, self.char_embedding_size]
+            )
         encoder_emb_inp = tf.nn.embedding_lookup(self.encoder_embedding, input_seq)
         if self.mode != "ENCODE":
             assert target_seq is not None
             if self.encode_vocabulary == self.decode_vocabulary:
                 self.decoder_embedding = self.encoder_embedding
+            elif self.one_hot_embedding:
+                self.decoder_embedding = tf.one_hot(
+                    list(range(0, self.decode_voc_size)),
+                    self.decode_voc_size
+                )
             else:
-                self.decoder_embedding = tf.get_variable("char_embedding2",
-                                                         [self.decode_voc_size,
-                                                          self.char_embedding_size])
+                self.decoder_embedding = tf.get_variable(
+                    "char_embedding2",
+                    [self.decode_voc_size, self.char_embedding_size]
+                )
             decoder_emb_inp = tf.nn.embedding_lookup(self.decoder_embedding, target_seq)
             return encoder_emb_inp, decoder_emb_inp
         else:
@@ -243,8 +271,9 @@ class BaseModel(ABC):
 
     def _compute_loss(self, logits):
         """Method that calculates the loss function."""
-        crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.shifted_target_seq,
-                                                                  logits=logits)
+        crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(
+            labels=self.shifted_target_seq,
+            logits=logits)
         loss = (tf.reduce_sum(crossent * self.target_mask))
         return loss
 
@@ -302,7 +331,7 @@ class BaseModel(ABC):
         assert self.mode == "ENCODE"
         return sess.run(self.encoded_seq, {self.input_seq: input_seq,
                                            self.input_len: input_len})
-    def emb2seq(self, sess, embedding, num_top):
+    def emb2seq(self, sess, embedding, num_top, maximum_iterations=1000):
         """Method to run a forwards path from bottlneck layer to output sequnce (DECODER).
         Decodes the embedding (molecular descriptor) back to a sequnce representaion.
 
@@ -314,8 +343,8 @@ class BaseModel(ABC):
             Embedding of the input sequnces.
         """
         assert self.mode == "DECODE"
-        output_seq = sess.run(self.output_ids, {self.encoded_seq: embedding})
-        #print(output_seq.shape)
+        output_seq = sess.run(self.output_ids, {self.encoded_seq: embedding,
+                                                self.maximum_iterations: maximum_iterations})
         return [[self.idx_to_char(seq[:, i]) for i in range(num_top)] for seq in output_seq]
 
     def initilize(self, sess, overwrite_saves=False):
@@ -436,10 +465,131 @@ class GRUSeq2Seq(BaseModel):
                 decoder=decoder,
                 impute_finished=False,
                 output_time_major=False,
-                maximum_iterations=1000
+                maximum_iterations=self.maximum_iterations
             )
 
             return outputs.predicted_ids
+        
+class GRUVAE(GRUSeq2Seq):
+    def __init__(self, mode, iterator, hparams):
+        super().__init__(mode, iterator, hparams)
+        self.div_loss_scale = hparams.div_loss_scale
+        self.div_loss_rate = hparams.div_loss_rate
+        
+    def _encoder(self, encoder_emb_inp):
+
+        """Method that defines the encoder part of the translation model graph."""
+        encoder_cell = [tf.nn.rnn_cell.GRUCell(size) for size in self.cell_size]
+        encoder_cell = tf.contrib.rnn.MultiRNNCell(encoder_cell)
+        encoder_outputs, encoder_state = tf.nn.dynamic_rnn(encoder_cell,
+                                                           encoder_emb_inp,
+                                                           sequence_length=self.input_len,
+                                                           dtype=tf.float32,
+                                                           time_major=False)
+        loc = tf.layers.dense(tf.concat(encoder_state, axis=1),
+                              self.embedding_size
+                             )
+        log_scale = tf.layers.dense(tf.concat(encoder_state, axis=1),
+                                self.embedding_size
+                               )
+        return loc, log_scale
+    
+    def _sampler(self, loc, log_scale):
+        epsilon = tf.random_normal(
+            shape=[tf.shape(loc)[0], self.embedding_size],
+            mean=0,
+            stddev=1
+        )
+        return loc + tf.exp(log_scale) * epsilon
+    
+    def _compute_loss(self, logits, loc, log_scale):
+        """Method that calculates the loss function."""
+        
+        crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(
+            labels=self.shifted_target_seq,
+            logits=logits)
+        crossent = tf.reduce_sum(crossent * self.target_mask, axis=1)
+        
+        divergence = -0.5 * tf.reduce_sum(1 + 2*log_scale - tf.square(loc) - tf.square(tf.exp(log_scale)), axis=-1)
+    
+        self.measures_to_log["crossent"] = tf.reduce_mean(crossent)
+        self.measures_to_log["divergence"] = tf.reduce_mean(divergence)
+        
+        div_loss_scale = self.div_loss_scale - tf.train.exponential_decay(self.div_loss_scale,
+                                                 self.global_step,
+                                                 10000,
+                                                 self.div_loss_rate,
+                                                 staircase=True,)
+        
+        self.measures_to_log["div_loss_scale"] = div_loss_scale
+        return tf.reduce_mean(crossent + div_loss_scale * divergence)
+    
+    def build_graph(self):
+        """Method that defines the graph for a translation model instance."""
+        if self.mode in ["TRAIN", "EVAL"]:
+            with tf.name_scope("Input"):
+                (self.input_seq,
+                 self.shifted_target_seq,
+                 self.input_len,
+                 self.shifted_target_len,
+                 self.target_mask,
+                 encoder_emb_inp,
+                 decoder_emb_inp) = self._input()
+
+            with tf.variable_scope("Encoder"):
+                loc, log_scale = self._encoder(encoder_emb_inp)
+                encoded_seq = self._sampler(loc, log_scale)
+
+            with tf.variable_scope("Decoder"):
+                logits = self._decoder(encoded_seq, decoder_emb_inp)
+                self.prediction = tf.argmax(logits, axis=2, output_type=tf.int32)
+
+            with tf.name_scope("Measures"):
+                #rossent, divergence, self.loss = self._compute_loss(logits, posterior)
+                self.loss = self._compute_loss(logits, loc, log_scale)
+                self.accuracy = self._compute_accuracy(self.prediction)
+                self.measures_to_log["loss"] = self.loss
+                self.measures_to_log["accuracy"] = self.accuracy
+
+            if self.mode == "TRAIN":
+                with tf.name_scope("Training"):
+                    self._training()
+
+        if self.mode == "ENCODE":
+            with tf.name_scope("Input"):
+                self.input_seq = tf.placeholder(tf.int32, [None, None])
+                self.input_len = tf.placeholder(tf.int32, [None])
+                encoder_emb_inp = self._emb_lookup(self.input_seq)
+
+            with tf.variable_scope("Encoder"):
+                loc, log_scale = self._encoder(encoder_emb_inp)
+                self.encoded_seq = self._sampler(loc, log_scale)
+
+        if self.mode == "DECODE":
+            if self.one_hot_embedding:
+                self.decoder_embedding = tf.one_hot(
+                    list(range(0, self.decode_voc_size)),
+                    self.decode_voc_size
+                )
+            elif self.encode_vocabulary == self.decode_vocabulary:
+                self.decoder_embedding = tf.get_variable(
+                    "char_embedding",
+                    [self.decode_voc_size, self.char_embedding_size]
+                )
+            else:
+                self.decoder_embedding = tf.get_variable(
+                    "char_embedding2",
+                    [self.decode_voc_size, self.char_embedding_size]
+                )
+
+            with tf.name_scope("Input"):
+                self.encoded_seq = tf.placeholder(tf.float32,
+                                                  [None, self.embedding_size])
+
+            with tf.variable_scope("Decoder"):
+                self.output_ids = self._decoder(self.encoded_seq)
+
+        self.saver_op = tf.train.Saver()
 
 class NoisyGRUSeq2Seq(GRUSeq2Seq):
     """Translation model class with a multi-layer Recurrent Neural Network as Encoder and
@@ -682,12 +832,25 @@ class GRUSeq2SeqWithFeatures(GRUSeq2Seq):
                 self.encoded_seq = self._encoder(encoder_emb_inp)
 
         if self.mode == "DECODE":
-            self.decoder_embedding = tf.get_variable("char_embedding",
-                                                     [self.decode_voc_size,
-                                                      self.char_embedding_size]
-                                                    )
+            if self.one_hot_embedding:
+                self.decoder_embedding = tf.one_hot(
+                    list(range(0, self.decode_voc_size)),
+                    self.decode_voc_size
+                )
+            elif self.encode_vocabulary == self.decode_vocabulary:
+                self.decoder_embedding = tf.get_variable(
+                    "char_embedding",
+                    [self.decode_voc_size, self.char_embedding_size]
+                )
+            else:
+                self.decoder_embedding = tf.get_variable(
+                    "char_embedding2",
+                    [self.decode_voc_size, self.char_embedding_size]
+                )
+
             with tf.name_scope("Input"):
                 self.encoded_seq = tf.placeholder(tf.float32, [None, self.embedding_size])
+                self.maximum_iterations = tf.placeholder(tf.int32, [])
             with tf.variable_scope("Decoder"):
                 self.output_ids = self._decoder(self.encoded_seq)
         self.saver_op = tf.train.Saver()
@@ -771,4 +934,20 @@ class NoisyGRUSeq2SeqWithFeatures(GRUSeq2SeqWithFeatures):
                                     dtype=tf.float32)
         emb = self.emb_activation(emb)
         return emb
-        
+
+class ModelWithGrads(NoisyGRUSeq2SeqWithFeatures):
+    def __init__(self, mode, iterator, hparams):
+        super().__init__(mode, iterator, hparams)
+
+    def build_graph(self):
+        with tf.name_scope("Input"):
+            self.input_seq = tf.placeholder(tf.int32, [None, None])
+            self.input_len = tf.placeholder(tf.int32, [None])
+            self.start_grads = tf.placeholder(tf.float32, [None, ndims])
+            encoder_emb_inp = self._emb_lookup(self.input_seq)
+
+        with tf.variable_scope("Encoder"):
+            self.encoded_seq = self._encoder(encoder_emb_inp)
+        self.grads = tf.gradients(self.encoded_seq, encoder_emb_inp, self.start_grads)
+
+        self.saver_op = tf.train.Saver()

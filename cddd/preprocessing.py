@@ -1,8 +1,10 @@
 """Functions that can be used to preprocess SMILES sequnces in the form used in the publication."""
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 from rdkit.Chem.SaltRemover import SaltRemover
 from rdkit import Chem
+from rdkit.Chem import Descriptors
 REMOVER = SaltRemover()
 ORGANIC_ATOM_SET = set([5, 6, 7, 8, 9, 15, 16, 17, 35, 53])
 
@@ -140,6 +142,48 @@ def organic_filter(sml):
             return False
     except:
         return False
+    
+def filter_smiles(sml):
+    try:
+        m = Chem.MolFromSmiles(sml)
+        logp = Descriptors.MolLogP(m)
+        mol_weight = Descriptors.MolWt(m)
+        num_heavy_atoms = Descriptors.HeavyAtomCount(m)
+        atom_num_list = [atom.GetAtomicNum() for atom in m.GetAtoms()]
+        is_organic = set(atom_num_list) <= ORGANIC_ATOM_SET
+        if ((logp > -5) & (logp < 7) & 
+            (mol_weight > 12) & (mol_weight < 600) &
+            (num_heavy_atoms > 3) & (num_heavy_atoms < 50) &
+            is_organic ):
+            return Chem.MolToSmiles(m)
+        else:
+            return float('nan')
+    except:
+        return float('nan')
+    
+def get_descriptors(sml):
+    try:
+        m = Chem.MolFromSmiles(sml)
+        descriptor_list = []
+        descriptor_list.append(Descriptors.MolLogP(m))
+        descriptor_list.append(Descriptors.MolMR(m)) #ok
+        descriptor_list.append(Descriptors.BalabanJ(m))
+        descriptor_list.append(Descriptors.NumHAcceptors(m)) #ok
+        descriptor_list.append(Descriptors.NumHDonors(m)) #ok
+        descriptor_list.append(Descriptors.NumValenceElectrons(m))
+        descriptor_list.append(Descriptors.TPSA(m)) # nice
+        return descriptor_list
+    except:
+        return [np.float("nan")] * 7
+def create_feature_df(smiles_df):
+    temp = list(zip(*smiles_df['canonical_smiles'].map(get_descriptors)))
+    columns = ["MolLogP", "MolMR", "BalabanJ", "NumHAcceptors", "NumHDonors", "NumValenceElectrons", "TPSA"]
+    df = pd.DataFrame(columns=columns)
+    for i, c in enumerate(columns):
+        df.loc[:, c] = temp[i]
+    df = (df - df.mean(axis=0, numeric_only=True)) / df.std(axis=0, numeric_only=True)
+    df = smiles_df.join(df)
+    return df
 
 def preprocess_smiles(sml):
     """Function that preprocesses a SMILES string such that it is in the same format as
@@ -153,8 +197,17 @@ def preprocess_smiles(sml):
         preprocessd SMILES sequnces or nan.
     """
     new_sml = remove_salt_stereo(sml, REMOVER)
-    if new_sml != np.float("nan"):
-        if not organic_filter(new_sml):
-            new_sml = np.float("nan")
+    new_sml = filter_smiles(new_sml)
     return new_sml
+
+
+def preprocess_list(smiles):
+    df = pd.DataFrame(smiles)
+    df["canonical_smiles"] = df[0].map(preprocess_smiles)
+    df = df.drop([0], axis=1)
+    df = df.dropna(subset=["canonical_smiles"])
+    df = df.reset_index(drop=True)
+    df["random_smiles"] = df["canonical_smiles"].map(randomize_smile)
+    df = create_feature_df(df)
+    return df
     

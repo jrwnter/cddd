@@ -26,7 +26,7 @@ def add_arguments(parser):
     parser.add_argument('-e', '--emb_size', help='size of bottleneck layer', default=128, type=int)
     parser.add_argument('-l', '--learning_rate', default=0.0005, type=float)
     parser.add_argument('-s', '--save_dir',
-                        help='path to save and log files', default=".", type=str)
+                        help='path to save and log files', default=os.path.join(DEFAULT_DATA_DIR, 'default_model'), type=str)
     parser.add_argument('-d', '--device',
                         help="number of cuda visible devise", default="-1", type=str)
     parser.add_argument('-gmf', '--gpu_mem_frac', default=1.0, type=float)
@@ -35,6 +35,7 @@ def add_arguments(parser):
                         default=1000, type=int)
     parser.add_argument('--inference_freq', help='log qsar modelling performance', default=5000, type=int)
     parser.add_argument('--batch_size', default=64, type=int)
+    parser.add_argument('--one_hot_embedding', default=False, type=bool)
     parser.add_argument('--char_embedding_size', default=32, type=int)
     parser.add_argument('--train_file', default="../data/pretrain_dataset.tfrecords", type=str)
     parser.add_argument('--val_file', default="../data/pretrain_dataset_val.tfrecords", type=str)
@@ -61,6 +62,8 @@ def add_arguments(parser):
     parser.add_argument('--rand_input_swap', default=False, type=bool)
     parser.add_argument('--infer_input', default="random", type=str)
     parser.add_argument('--emb_activation', default="tanh", type=str)
+    parser.add_argument('--div_loss_scale', default=1.0, type=float)
+    parser.add_argument('--div_loss_rate', default=0.9, type=float)
 
 def create_hparams(flags):
     """Create training hparams."""
@@ -79,6 +82,7 @@ def create_hparams(flags):
         summary_freq=flags.summary_freq,
         inference_freq=flags.inference_freq,
         batch_size=flags.batch_size,
+        one_hot_embedding = flags.one_hot_embedding,
         char_embedding_size=flags.char_embedding_size,
         train_file=flags.train_file,
         val_file=flags.val_file,
@@ -102,14 +106,17 @@ def create_hparams(flags):
         rand_input_swap=flags.rand_input_swap,
         infer_input=flags.infer_input,
         emb_activation=flags.emb_activation,
+        div_loss_scale=flags.div_loss_scale,
+        div_loss_rate=flags.div_loss_rate,
     )
+    hparams.add_hparam("encode_vocabulary_file", os.path.join(DEFAULT_DATA_DIR, "indices_char.npy"))
+    hparams.add_hparam("decode_vocabulary_file", os.path.join(DEFAULT_DATA_DIR, "indices_char.npy"))
     hparams_file_name = flags.hparams_file_name
     if hparams_file_name is None:
         hparams_file_name = os.path.join(hparams.save_dir, 'hparams.json')
     if flags.hparams_from_file:
         hparams.cell_size = list()
         hparams = hparams.parse_json(json.load(open(hparams_file_name)))
-
-    hparams.add_hparam("encode_vocabulary_file", os.path.join(DEFAULT_DATA_DIR, "indices_char.npy"))
-    hparams.add_hparam("decode_vocabulary_file", os.path.join(DEFAULT_DATA_DIR, "indices_char.npy"))
+        hparams.set_hparam("encode_vocabulary_file", os.path.join(DEFAULT_DATA_DIR, "indices_char.npy"))
+        hparams.set_hparam("decode_vocabulary_file", os.path.join(DEFAULT_DATA_DIR, "indices_char.npy"))
     return hparams

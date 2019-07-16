@@ -39,8 +39,11 @@ def main(unused_argv):
     meaningfull features for a QSAR modelling"""
     if FLAGS.gpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = str(FLAGS.device)
+        print("use gpu {}".format(str(FLAGS.device)))
+    else:
+        os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
     model_dir = FLAGS.model_dir
-    
+
     infer_model = InferenceModel(model_dir, use_gpu=FLAGS.gpu)
     ames_df = pd.read_csv("ames.csv")
     ames_smls = ames_df.smiles.tolist()

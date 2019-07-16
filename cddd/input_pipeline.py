@@ -52,10 +52,10 @@ class InputPipeline():
             self.input_sequence_key = "canonical_smiles"
             self.file = hparams.val_file
         self.encode_vocabulary = {
-            v: k for k, v in np.load(hparams.encode_vocabulary_file).item().items()
+            v: k for k, v in np.load(hparams.encode_vocabulary_file, allow_pickle=True).item().items()
         }
         self.decode_vocabulary = {
-            v: k for k, v in np.load(hparams.decode_vocabulary_file).item().items()
+            v: k for k, v in np.load(hparams.decode_vocabulary_file, allow_pickle=True).item().items()
         }
         self.num_buckets = hparams.num_buckets
         self.min_bucket_lenght = hparams.min_bucket_length
@@ -187,7 +187,8 @@ class InputPipeline():
         return ds.padded_batch(
             batch_size,
             padded_shapes=padded_shapes,
-            padding_values=padded_values
+            padding_values=padded_values,
+            drop_remainder=True
         )
 
 class InputPipelineWithFeatures(InputPipeline):
@@ -321,7 +322,7 @@ class InputPipelineInferEncode():
         self.seq_list = seq_list
         self.batch_size = hparams.batch_size
         self.encode_vocabulary = {
-            v: k for k, v in np.load(hparams.encode_vocabulary_file).item().items()
+            v: k for k, v in np.load(hparams.encode_vocabulary_file, allow_pickle=True).item().items()
         }
         self.input_sequence_key = hparams.input_sequence_key
         if "inchi" in self.input_sequence_key:

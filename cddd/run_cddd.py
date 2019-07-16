@@ -59,7 +59,6 @@ def main(unused_argv):
     if FLAGS.gpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = str(FLAGS.device)
     model_dir = FLAGS.model_dir
-
     file = FLAGS.input
     df = read_input(file)
     if FLAGS.preprocess:

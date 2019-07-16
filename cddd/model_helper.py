@@ -59,5 +59,5 @@ def create_model(mode, model_creator, input_pipeline_creator, hparams):
                               hparams=hparams
                              )
         model.build_graph()
-    sess = tf.Session(graph=graph, config=sess_config)
+        sess = tf.Session(graph=graph, config=sess_config)
     return Model(graph=graph, model=model, sess=sess)
