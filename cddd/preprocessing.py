@@ -176,6 +176,7 @@ def get_descriptors(sml):
         return descriptor_list
     except:
         return [np.float("nan")] * 7
+    
 def create_feature_df(smiles_df):
     temp = list(zip(*smiles_df['canonical_smiles'].map(get_descriptors)))
     columns = ["MolLogP", "MolMR", "BalabanJ", "NumHAcceptors", "NumHDonors", "NumValenceElectrons", "TPSA"]
