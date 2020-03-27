@@ -151,10 +151,11 @@ def filter_smiles(sml):
         num_heavy_atoms = Descriptors.HeavyAtomCount(m)
         atom_num_list = [atom.GetAtomicNum() for atom in m.GetAtoms()]
         is_organic = set(atom_num_list) <= ORGANIC_ATOM_SET
-        if ((logp > -5) & (logp < 7) & 
-            (mol_weight > 12) & (mol_weight < 600) &
-            (num_heavy_atoms > 3) & (num_heavy_atoms < 50) &
-            is_organic ):
+        
+        if (-5 < logp < 7) and\
+            (12 < mol_weight < 600) and\
+               (3 < num_heavy_atoms <50) and\
+                   is_organic:
             return Chem.MolToSmiles(m)
         else:
             return float('nan')
