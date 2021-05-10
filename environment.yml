@@ -5,6 +5,10 @@ channels:
   - defaults
 
 dependencies:
-  - anaconda::python=3.6
-  - rdkit::rdkit=2018.03.3.0
-  - anaconda::scikit-learn=0.19.1
+  - python=3.6
+  - numpy<=1.14.5
+  - pandas<=1.0.3
+  - rdkit
+  - scikit-learn
+  - pip:
+      cddd
