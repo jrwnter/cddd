@@ -1,10 +1,14 @@
 name: cddd
-
 channels:
   - rdkit
+  - conda-forge
   - defaults
-
 dependencies:
+  - anaconda::pip
   - anaconda::python=3.6
   - rdkit::rdkit=2018.03.3.0
   - anaconda::scikit-learn=0.19.1
+  - conda-forge::tensorflow=1.10.0
+  - pip:
+    - git+https://github.com/jrwnter/cddd.git
+

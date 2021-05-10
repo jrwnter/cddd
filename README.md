@@ -16,29 +16,21 @@ rdkit
 scikit-learn
 ```
 ### Conda
-Create a new enviorment:
+Create a new environment:
 ```bash
-git clone https://github.com/jrwnter/cddd.git
-cd cddd
 conda env create -f environment.yml
-source activate cddd
+conda activate cddd
 ```
-Install tensorflow without GPU support:
+Using the specification in the `environment.yml` file in the prior step, tensorflow is installed without GPU support; to optionally install tensorflow with GPU support (available only on Linux or Windows, not MacOS):
 ```bash
-pip install --ignore-installed --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl
-```
-Or with GPU support:
-```bash
-pip install --ignore-installed --upgrade https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-1.10.0-cp36-cp36m-linux_x86_64.whl
-```
-And install the cddd package:
-```bash
-pip install .
+conda install -c conda-forge tensorflow-gpu=1.10.0
 ```
 
 ### Downloading Pretrained Model
 A pretrained model as described in ref. 1 is available on Google Drive. Download and unzip by execuiting the bash script "download_default_model.sh":
 ```bash
+git clone https://github.com/jrwnter/cddd
+cd cddd
 ./download_default_model.sh
 ```
 The default_model.zip file can also be downloaded manualy under https://drive.google.com/open?id=1oyknOulq_j0w9kzOKKIHdTLo5HphT99h
