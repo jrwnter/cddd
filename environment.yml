@@ -1,4 +1,4 @@
-name: cddd_test2
+name: cddd
 
 channels:
   - rdkit
