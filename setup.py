@@ -2,12 +2,12 @@ from setuptools import setup
 
 setup(
     name='cddd',
-    version='1.2',
+    version='1.2.2',
     packages=['cddd', 'cddd.data'],
     package_data={'cddd': ['data/*', 'data/default_model/']},
     include_package_data=True,
     url='https://github.com/jrwnter/cddd',
-    download_url='https://github.com/jrwnter/cddd/archive/refs/tags/1.2.tar.gz',
+    download_url='https://github.com/jrwnter/cddd/archive/refs/tags/1.2.2.tar.gz',
     license='MIT',
     author='Robin Winter',
     author_email='robin.winter@bayer.com',
