@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='cddd',
-    version='1.0',
+    version='1.1',
     packages=['cddd', 'cddd.data'],
     package_data={'cddd': ['data/*', 'data/default_model/']},
     include_package_data=True,
