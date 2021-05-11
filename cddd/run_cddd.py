@@ -52,7 +52,7 @@ def read_input(file):
     if file.endswith('.csv'):
         sml_df = pd.read_csv(file)
     elif file.endswith('.smi'):
-        sml_df = pd.read_table(file, header=None).rename({0:FLAGS.smiles_header, 1:"EXTREG"},
+        sml_df = pd.read_table(file, header=None).rename({0:FLAGS.smiles_header, 1: "EXTREG"},
                                                          axis=1)
     else:
         raise ValueError("use .csv or .smi format...")

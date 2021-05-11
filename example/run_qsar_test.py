@@ -18,8 +18,8 @@ import tensorflow as tf
 from sklearn.svm import SVC, SVR
 from sklearn.model_selection import cross_val_score, LeaveOneGroupOut
 from cddd.inference import InferenceModel
-from cddd.hyperparameters import DEFAULT_DATA_DIR
-_default_model_dir = os.path.join(DEFAULT_DATA_DIR, 'default_model')
+from cddd.data.download_pretrained import PRETRAINED_MODEL_DIR, download_pretrained_model
+DEFAULT_MODEL_DIR = os.path.join(PRETRAINED_MODEL_DIR, 'default_model')
 
 
 FLAGS = None
@@ -32,7 +32,7 @@ def add_arguments(parser):
     Returns:
         None
     """
-    parser.add_argument('--model_dir', default=_default_model_dir, type=str)
+    parser.add_argument('--model_dir', default=DEFAULT_MODEL_DIR, type=str)
     parser.add_argument('--use_gpu', dest='gpu', action='store_true')
     parser.set_defaults(gpu= False)
     parser.add_argument('--device', default="0", type=str)
@@ -47,6 +47,9 @@ def main(unused_argv):
     else:
         os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
     model_dir = FLAGS.model_dir
+    if (model_dir == DEFAULT_MODEL_DIR) & (not os.path.isdir(DEFAULT_MODEL_DIR)):
+        print("Downloading pretrained model in {}...".format(DEFAULT_MODEL_DIR))
+        download_pretrained_model()
 
     infer_model = InferenceModel(model_dir, use_gpu=FLAGS.gpu, cpu_threads=FLAGS.cpu_threads)
     ames_df = pd.read_csv("ames.csv")

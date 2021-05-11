@@ -9,35 +9,35 @@ Descriptors by Translating Equivalent Chemical Representations" by Robin Winter,
 
 ### Prerequisites
 ```
-python 3
+python 3.6
 tensorflow 1.10
-numpy
+numpy<=1.14.5
+pandas<=1.0.3
 rdkit
 scikit-learn
 ```
 ### Conda
-Create a new enviorment:
+Create a new enviorment with above mentioned prerequisites and:
 ```bash
-git clone https://github.com/jrwnter/cddd.git
-cd cddd
-conda env create -f environment.yml
-source activate cddd
+pip install cddd  # with GPU support
 ```
-Install tensorflow without GPU support:
+or 
 ```bash
-pip install --ignore-installed --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl
+pip install cddd-cpu  # without GPU support
 ```
-Or with GPU support:
+
+Or simply utilize the repspective .yml file:
 ```bash
-pip install --ignore-installed --upgrade https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-1.10.0-cp36-cp36m-linux_x86_64.whl
+conda env create -f environment_gpu.yml  # with GPU support
 ```
-And install the cddd package:
+or 
 ```bash
-pip install .
+conda env create -f environment_cpu.yml  # without GPU support
 ```
 
 ### Downloading Pretrained Model
-A pretrained model as described in ref. 1 is available on Google Drive. Download and unzip by execuiting the bash script "download_default_model.sh":
+A pretrained model as described in ref. 1 is available on Google Drive. It is automatically downloaded to the default
+user data dir (as defined by appdirs). It can also wbe download and unzip by execuiting the bash script "download_default_model.sh":
 ```bash
 ./download_default_model.sh
 ```
@@ -46,11 +46,11 @@ The default_model.zip file can also be downloaded manualy under https://drive.go
 Extract molecular descriptors from two QSAR datasets (ref. 2,3) and evaluate the perfromance of a SVM trained on these descriptors.
 ```bash
 cd example
-python3 run_qsar_test.py --model_dir ../default_model
+python run_qsar_test.py
 ```
 or with gpu support on e.g. device 0:
 ```
-python3 run_qsar_test.py --model_dir ../default_model --use_gpu --device 0
+python run_qsar_test.py --use_gpu --device 0
 ```
 The accuracy on the Ames dataset should be arround 0.814 +/- 0.006.
 

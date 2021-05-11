@@ -9,14 +9,13 @@ import os
 from cddd.input_pipeline import InputPipelineInferEncode, InputPipelineInferDecode
 from cddd.hyperparameters import add_arguments, create_hparams
 from cddd.model_helper import build_models
-from cddd.hyperparameters import DEFAULT_DATA_DIR
+from cddd.data.download_pretrained import PRETRAINED_MODEL_DIR, download_pretrained_model
+DEFAULT_MODEL_DIR = os.path.join(PRETRAINED_MODEL_DIR, 'default_model')
 
 try:
     import zmq
 except ImportError:
     print("Consider installing the package zmq to utilize the InferenceServer class")
-
-_default_model_dir = os.path.join(DEFAULT_DATA_DIR, 'default_model')
 
 
 def sequence2embedding(model, hparams, seq_list):
@@ -76,7 +75,7 @@ def embedding2sequence(model, hparams, embedding, num_top=1, maximum_iterations=
 
 class InferenceModel(object):
     """Class that handles the inference of a trained model."""
-    def __init__(self, model_dir=_default_model_dir, use_gpu=True, batch_size=256,
+    def __init__(self, model_dir=DEFAULT_MODEL_DIR, use_gpu=True, batch_size=256,
                  gpu_mem_frac=0.1, beam_width=10, num_top=1, maximum_iterations=1000,
                  cpu_threads=5, emb_activation=None):
         """Constructor for the inference model.
@@ -99,6 +98,9 @@ class InferenceModel(object):
         flags = parser.parse_args([])
         flags.hparams_from_file = True
         flags.save_dir = model_dir
+        if (model_dir == DEFAULT_MODEL_DIR) & (not os.path.isdir(DEFAULT_MODEL_DIR)):
+            print("Downloading pretrained model in {}...".format(DEFAULT_MODEL_DIR))
+            download_pretrained_model()
         self.hparams = create_hparams(flags)
         self.hparams.set_hparam("save_dir", model_dir)
         self.hparams.set_hparam("batch_size", batch_size)
@@ -149,7 +151,7 @@ class InferenceModel(object):
         return seq
 
 class InferenceServer():
-    def __init__(self, model_dir=_default_model_dir, num_servers=1, port_frontend="5559", port_backend="5560",
+    def __init__(self, model_dir=DEFAULT_MODEL_DIR, num_servers=1, port_frontend="5559", port_backend="5560",
                  batch_size=256, gpu_mem_frac=0.3, beam_width=10, num_top=1, maximum_iterations=1000, use_running=False):
         self.model_dir = model_dir
         self.port_frontend = port_frontend
