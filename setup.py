@@ -4,7 +4,7 @@ setup(
     name='cddd',
     version='1.2.2',
     packages=['cddd', 'cddd.data'],
-    package_data={'cddd': ['data/*', 'data/default_model/']},
+    package_data={'cddd': ['data/*', 'data/default_model']},
     include_package_data=True,
     url='https://github.com/jrwnter/cddd',
     download_url='https://github.com/jrwnter/cddd/archive/refs/tags/1.2.2.tar.gz',
@@ -21,7 +21,7 @@ setup(
         'appdirs'
       ],
     extras_require = {
-        'cpu' : [
+        'cpu': [
             'tensorflow==1.10.0'
             ]
     },

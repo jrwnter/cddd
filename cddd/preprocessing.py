@@ -122,7 +122,7 @@ def remove_salt_stereo(sml, remover):
             sml = keep_largest_fragment(sml)
     except:
         sml = np.float("nan")
-    return sml
+    return(sml)
 
 def organic_filter(sml):
     """Function that filters for organic molecules.
@@ -137,11 +137,11 @@ def organic_filter(sml):
         atom_num_list = [atom.GetAtomicNum() for atom in m.GetAtoms()]
         is_organic = (set(atom_num_list) <= ORGANIC_ATOM_SET)
         if is_organic:
-            return sml
+            return True
         else:
-            return float('nan')
+            return False
     except:
-        return float('nan')
+        return False
 
 def filter_smiles(sml):
     try:
@@ -149,9 +149,12 @@ def filter_smiles(sml):
         logp = Descriptors.MolLogP(m)
         mol_weight = Descriptors.MolWt(m)
         num_heavy_atoms = Descriptors.HeavyAtomCount(m)
+        atom_num_list = [atom.GetAtomicNum() for atom in m.GetAtoms()]
+        is_organic = set(atom_num_list) <= ORGANIC_ATOM_SET
         if ((logp > -5) & (logp < 7) &
             (mol_weight > 12) & (mol_weight < 600) &
-            (num_heavy_atoms > 3) & (num_heavy_atoms < 50)):
+            (num_heavy_atoms > 3) & (num_heavy_atoms < 50) &
+            is_organic ):
             return Chem.MolToSmiles(m)
         else:
             return float('nan')
