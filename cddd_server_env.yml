@@ -1,0 +1,16 @@
+name: cddd_server
+
+channels:
+  - anaconda
+  - rdkit
+
+dependencies:
+  - tensorflow-gpu=1.15
+  - python=3.6
+  - numpy=1.19
+  - rdkit
+  - scikit-learn
+  - pyzmq
+  - appdirs
+  - flask
+  - requests
