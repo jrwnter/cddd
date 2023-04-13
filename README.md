@@ -31,10 +31,17 @@ Or with GPU support:
 ```bash
 pip install --ignore-installed --upgrade https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow_gpu-1.10.0-cp36-cp36m-linux_x86_64.whl
 ```
+
+On Windows, with CPU only:
+```bash
+pip install --ignore-installed --upgrade https://storage.googleapis.com/tensorflow/windows/cpu/tensorflow-1.10.0-cp36-cp36m-win_amd64.whl
+```
+
 And install the cddd package:
 ```bash
 pip install .
 ```
+
 
 ### Downloading Pretrained Model
 A pretrained model as described in ref. 1 is available on Google Drive. Download and unzip by execuiting the bash script "download_default_model.sh":
