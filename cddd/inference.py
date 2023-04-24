@@ -144,8 +144,6 @@ class InferenceModel(object):
                 seq = embedding2sequence(self.decode_model, self.hparams, embedding, self.num_top, self.maximum_iterations)
         if len(seq) == 1:
             seq = seq[0]
-        if len(seq) == 1:
-            seq = seq[0]
         return seq
 
 class InferenceServer():
